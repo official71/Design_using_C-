@@ -29,7 +29,7 @@ vector<int>::iterator get_index_in_vector(int val, vector<int>& vec,
         return beg;
 
     vector<int>::iterator i = beg;
-    advance(i, distance(beg, end)/2);
+    i += distance(beg, end)/2;
     if (*i > val)
         return get_index_in_vector(val, vec, beg, i);
     else if (*i < val)
@@ -60,7 +60,8 @@ list<int>::iterator get_index_in_list(int val, list<int>& lst,
         return beg;
 
     list<int>::iterator i = beg;
-    advance(i, distance(beg, end)/2);
+    for (int c = 0; c < distance(beg, end)/2; c++)
+        i++;
     if (*i > val)
         return get_index_in_list(val, lst, beg, i);
     else if (*i < val)
@@ -82,7 +83,8 @@ void remove_from_list(list<int>& from, vector<int>& index)
 {
     for (int i:index) {
         auto it = from.begin();
-        advance(it, i);
+        for (int c = 0; c < i; c++)
+            it++;
         from.erase(it);
     }
 }
@@ -94,18 +96,18 @@ void run(int max)
 
     /* generate the random sequence(vector) */
     auto t0 = high_resolution_clock::now();
-	vector<int> v {};
+    vector<int> v {};
     gen_random_seq(v, max, rng);
     /* print some
-	for (auto i = v.begin(); i < v.begin()+10; i++)
-		cout << *i << endl;
+    for (auto i = v.begin(); i < v.begin()+10; i++)
+        cout << *i << endl;
     */
 
-	vector<int> rm_index {};
+    vector<int> rm_index {};
     gen_random_index(rm_index, max, rng);
     /* print some
-	for (auto i = rm_index.begin(); i < rm_index.end(); i++)
-		cout << *i << endl;
+    for (auto i = rm_index.begin(); i < rm_index.end(); i++)
+        cout << *i << endl;
     */
     auto t1 = high_resolution_clock::now();
     cout << "-----------------------------" << endl;
@@ -114,8 +116,8 @@ void run(int max)
     vector<int> vec {};
     insert_seq_to_vector(v, vec);
     /* print some
-	for (auto i = vec.begin(); i < vec.begin()+10; i++)
-		cout << *i << endl;
+    for (auto i = vec.begin(); i < vec.begin()+10; i++)
+        cout << *i << endl;
     */
     t0 = t1;
     t1 = high_resolution_clock::now();
@@ -130,8 +132,8 @@ void run(int max)
     list<int> lst {};
     insert_seq_to_list(v, lst);
     /* print some
-	for (auto i = lst.begin(); i != lst.end(); i++)
-		cout << *i << endl;
+    for (auto i = lst.begin(); i != lst.end(); i++)
+        cout << *i << endl;
     */
     t0 = t1;
     t1 = high_resolution_clock::now();
@@ -145,9 +147,11 @@ void run(int max)
     cout << "-----------------------------" << endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    constexpr int max = 50000;
+    int max = 50000;
+    if (argc > 1)
+        max = atoi(argv[1]);
 
     for (auto i = 0; i < 3; i++)
         run(max);
