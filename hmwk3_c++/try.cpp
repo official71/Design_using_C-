@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <list>
 #include <random>
 #include <chrono>
 
@@ -52,6 +53,40 @@ void remove_from_vector(vector<int>& from, vector<int>& index)
         from.erase(from.begin() + i);
 }
 
+list<int>::iterator get_index_in_list(int val, list<int>& lst,
+    list<int>::iterator beg, list<int>::iterator end)
+{
+    if (beg == end)
+        return beg;
+
+    list<int>::iterator i = beg;
+    advance(i, distance(beg, end)/2);
+    if (*i > val)
+        return get_index_in_list(val, lst, beg, i);
+    else if (*i < val)
+        return get_index_in_list(val, lst, ++i, end);
+
+    cout << "Fatal error: " << val << " is duplicate!" << endl;
+    return beg;
+}
+
+void insert_seq_to_list(vector<int>& from, list<int>& to)
+{
+    for (auto i:from) {
+        auto indx = get_index_in_list(i, to, to.begin(), to.end());
+        to.insert(indx, i);
+    }
+}
+
+void remove_from_list(list<int>& from, vector<int>& index)
+{
+    for (int i:index) {
+        auto it = from.begin();
+        advance(it, i);
+        from.erase(it);
+    }
+}
+
 void run(int max)
 {
     random_device rd;
@@ -73,6 +108,8 @@ void run(int max)
 		cout << *i << endl;
     */
     auto t1 = high_resolution_clock::now();
+    cout << "-----------------------------" << endl;
+    cout << "Preparation time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
     vector<int> vec {};
     insert_seq_to_vector(v, vec);
@@ -80,22 +117,37 @@ void run(int max)
 	for (auto i = vec.begin(); i < vec.begin()+10; i++)
 		cout << *i << endl;
     */
-    auto t2 = high_resolution_clock::now();
+    t0 = t1;
+    t1 = high_resolution_clock::now();
+    cout << "Vector insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
     remove_from_vector(vec, rm_index);
     //cout << "empty: " << vec.empty() << endl;
-    auto t3 = high_resolution_clock::now();
+    t0 = t1;
+    t1 = high_resolution_clock::now();
+    cout << "Vector deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
-    /* let's count time! */
+    list<int> lst {};
+    insert_seq_to_list(v, lst);
+    /* print some
+	for (auto i = lst.begin(); i != lst.end(); i++)
+		cout << *i << endl;
+    */
+    t0 = t1;
+    t1 = high_resolution_clock::now();
+    cout << "List insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
+
+    remove_from_list(lst, rm_index);
+    //cout << "empty: " << lst.empty() << endl;
+    t0 = t1;
+    t1 = high_resolution_clock::now();
+    cout << "List deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
     cout << "-----------------------------" << endl;
-    cout << "Preparation time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
-    cout << "Insertion time: " << duration_cast<milliseconds>(t2-t1).count() << "msec" << endl;
-    cout << "Deletion time: " << duration_cast<milliseconds>(t3-t2).count() << "msec" << endl;
 }
 
 int main()
 {
-    constexpr int max = 200000;
+    constexpr int max = 50000;
 
     for (auto i = 0; i < 3; i++)
         run(max);
