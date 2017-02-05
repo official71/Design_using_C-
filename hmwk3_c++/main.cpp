@@ -143,12 +143,21 @@ void run(int max)
 
 int main(int argc, char* argv[])
 {
-    int max = 50000;
-    if (argc > 1)
-        max = atoi(argv[1]);
+    /* specified maximum number, single-time mode */
+    if (argc > 1) {
+        run(atoi(argv[1]));
+        return 0;
+    }
 
-    for (auto i = 0; i < 3; i++)
-        run(max);
+    cout << "size,prepare,vect-in,vect-out,list-in,list-out\n";
+    vector<int> vmax {10, 500, 2000, 10000, 50000, 100000, 200000, 1000000};
+    //vector<int> vmax {10, 500, 2000};
+    constexpr int rep = 3;
+
+    for (auto m:vmax) {
+        for (auto i = 0; i < rep; i++)
+            run(m);
+    }
 
     return 0;
 }
