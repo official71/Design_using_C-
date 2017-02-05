@@ -40,11 +40,30 @@ Ite binary_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
     return beg;
 }
 
+template<typename Con, typename Ele, typename Ite>
+Ite linear_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
+{
+    auto i = beg;
+    for (; i != end; i++) {
+        if (*i >= val)
+            break;
+    }
+    return i;
+}
+
 template<typename Con, typename Ele>
 void insert_to_seq(Con& to, vector<Ele>& from)
 {
     for (auto i:from) {
-        auto indx = binary_search_in_seq(to, i, to.begin(), to.end());
+        /* 
+         * Bianry search for the index of insertion point
+         */
+        //auto indx = binary_search_in_seq(to, i, to.begin(), to.end());
+        /* 
+         * or,
+         * Linear search for the index of insertion point
+         */
+        auto indx = linear_search_in_seq(to, i, to.begin(), to.end());
         to.insert(indx, i);
     }
 }
@@ -69,49 +88,53 @@ void run(int max)
     auto t0 = high_resolution_clock::now();
     vector<int> v {};
     gen_random_seq(v, max, rng);
-    /* print some
+#if 0
     for (auto i = v.begin(); i < v.begin()+10; i++)
         cout << *i << endl;
-    */
+#endif
 
     vector<int> rm_index {};
     gen_random_index(rm_index, max, rng);
-    /* print some
+#if 0
     for (auto i = rm_index.begin(); i < rm_index.end(); i++)
         cout << *i << endl;
-    */
+#endif
     auto t1 = high_resolution_clock::now();
     cout << "-----------------------------" << endl;
     cout << "Preparation time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
     vector<int> vec {};
     insert_to_seq(vec, v);
-    /* print some
+#if 0
     for (auto i = vec.begin(); i != vec.end(); i++)
         cout << *i << endl;
-    */
+#endif
     t0 = t1;
     t1 = high_resolution_clock::now();
     cout << "Vector insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
     remove_from_seq(vec, rm_index);
-    //cout << "empty: " << vec.empty() << endl;
+#if 0
+    cout << "empty: " << vec.empty() << endl;
+#endif
     t0 = t1;
     t1 = high_resolution_clock::now();
     cout << "Vector deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
     
     list<int> lst {};
     insert_to_seq(lst, v);
-    /* print some
+#if 0
     for (auto i = lst.begin(); i != lst.end(); i++)
         cout << *i << endl;
-    */
+#endif
     t0 = t1;
     t1 = high_resolution_clock::now();
     cout << "List insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
 
     remove_from_seq(lst, rm_index);
-    //cout << "empty: " << lst.empty() << endl;
+#if 0
+    cout << "empty: " << lst.empty() << endl;
+#endif
     t0 = t1;
     t1 = high_resolution_clock::now();
     cout << "List deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
