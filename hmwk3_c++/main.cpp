@@ -5,7 +5,6 @@
 #include <chrono>
 
 using namespace std;
-using namespace std::chrono;
 
 void gen_random_seq(vector<int>& vec, int max, mt19937& g)
 {
@@ -20,6 +19,16 @@ void gen_random_index(vector<int>& vec, int max, mt19937& g)
         auto die = bind(uniform_int_distribution<>{0,i}, g);
         vec.push_back(die());
     }
+}
+
+template<typename T>
+int time_stamp(T& orig)
+{
+    auto t = chrono::high_resolution_clock::now();
+    auto r = chrono::duration_cast<chrono::milliseconds>(t - orig).count();
+    orig = t;
+
+    return r;
 }
 
 template<typename Con, typename Ele, typename Ite>
@@ -81,11 +90,13 @@ void remove_from_seq(Con& from, vector<int>& index)
 
 void run(int max)
 {
+    cout << max << ",";
+
     random_device rd;
     mt19937 rng(rd());
 
     /* generate the random sequence(vector) */
-    auto t0 = high_resolution_clock::now();
+    auto t = chrono::high_resolution_clock::now();
     vector<int> v {};
     gen_random_seq(v, max, rng);
 #if 0
@@ -99,9 +110,7 @@ void run(int max)
     for (auto i = rm_index.begin(); i < rm_index.end(); i++)
         cout << *i << endl;
 #endif
-    auto t1 = high_resolution_clock::now();
-    cout << "-----------------------------" << endl;
-    cout << "Preparation time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
+    cout << time_stamp(t) << ",";
 
     vector<int> vec {};
     insert_to_seq(vec, v);
@@ -109,17 +118,13 @@ void run(int max)
     for (auto i = vec.begin(); i != vec.end(); i++)
         cout << *i << endl;
 #endif
-    t0 = t1;
-    t1 = high_resolution_clock::now();
-    cout << "Vector insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
+    cout << time_stamp(t) << ",";
 
     remove_from_seq(vec, rm_index);
 #if 0
     cout << "empty: " << vec.empty() << endl;
 #endif
-    t0 = t1;
-    t1 = high_resolution_clock::now();
-    cout << "Vector deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
+    cout << time_stamp(t) << ",";
     
     list<int> lst {};
     insert_to_seq(lst, v);
@@ -127,19 +132,13 @@ void run(int max)
     for (auto i = lst.begin(); i != lst.end(); i++)
         cout << *i << endl;
 #endif
-    t0 = t1;
-    t1 = high_resolution_clock::now();
-    cout << "List insertion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
+    cout << time_stamp(t) << ",";
 
     remove_from_seq(lst, rm_index);
 #if 0
     cout << "empty: " << lst.empty() << endl;
 #endif
-    t0 = t1;
-    t1 = high_resolution_clock::now();
-    cout << "List deletion time: " << duration_cast<milliseconds>(t1-t0).count() << "msec" << endl;
-    
-    cout << "-----------------------------" << endl;
+    cout << time_stamp(t) << endl;
 }
 
 int main(int argc, char* argv[])
