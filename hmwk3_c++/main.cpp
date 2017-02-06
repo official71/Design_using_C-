@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <set>
 #include <random>
 #include <chrono>
 
@@ -77,6 +78,13 @@ void insert_to_seq(Con& to, vector<Ele>& from)
     }
 }
 
+template<typename Ele>
+void insert_to_set(set<Ele>& to, vector<Ele>& from)
+{
+    for (Ele i:from)
+        to.insert(i);
+}
+
 template<typename Con>
 void remove_from_seq(Con& from, vector<int>& index)
 {
@@ -92,6 +100,9 @@ void run(int max)
 {
     cout << max << ",";
 
+    /****************
+     * Preparations *
+     ****************/
     random_device rd;
     mt19937 rng(rd());
 
@@ -112,6 +123,9 @@ void run(int max)
 #endif
     cout << time_stamp(t) << ",";
 
+    /**********
+     * Vector *
+     **********/
     vector<int> vec {};
     insert_to_seq(vec, v);
 #if 0
@@ -125,7 +139,10 @@ void run(int max)
     cout << "empty: " << vec.empty() << endl;
 #endif
     cout << time_stamp(t) << ",";
-    
+ 
+    /********
+     * List *
+     ********/
     list<int> lst {};
     insert_to_seq(lst, v);
 #if 0
@@ -137,6 +154,23 @@ void run(int max)
     remove_from_seq(lst, rm_index);
 #if 0
     cout << "empty: " << lst.empty() << endl;
+#endif
+    cout << time_stamp(t) << ",";
+
+    /*******
+     * Set *
+     *******/
+    set<int> st {};
+    insert_to_set(st, v);
+#if 0
+    for (auto i = st.begin(); i != st.end(); i++)
+        cout << *i << endl;
+#endif
+    cout << time_stamp(t) << ",";
+ 
+    remove_from_seq(st, rm_index);
+#if 0
+    cout << "empty: " << st.empty() << endl;
 #endif
     cout << time_stamp(t) << endl;
 }
@@ -150,7 +184,7 @@ int main(int argc, char* argv[])
     }
 
     cout << "size,prepare,vect-in,vect-out,list-in,list-out\n";
-    vector<int> vmax {10, 500, 2000, 10000, 50000, 100000, 200000, 1000000};
+    vector<int> vmax {10, 500, 2000, 10000, 50000, 100000, 200000};
     //vector<int> vmax {10, 500, 2000};
     constexpr int rep = 3;
 
