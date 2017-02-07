@@ -4,6 +4,8 @@
 #include <set>
 #include <random>
 #include <chrono>
+#include <functional>
+#include <algorithm>
 
 using namespace std;
 
