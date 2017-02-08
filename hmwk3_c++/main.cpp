@@ -34,6 +34,7 @@ int time_stamp(T& orig)
     return r;
 }
 
+/* Binary search for the insertion point in sequence */
 template<typename Con, typename Ele, typename Ite>
 Ite binary_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
 {
@@ -52,6 +53,7 @@ Ite binary_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
     return beg;
 }
 
+/* Linear search for the insertion point in sequence */
 template<typename Con, typename Ele, typename Ite>
 Ite linear_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
 {
@@ -63,23 +65,60 @@ Ite linear_search_in_seq(Con& seq, Ele val, Ite beg, Ite end)
     return i;
 }
 
+struct Greater_than {
+    int val;
+    Greater_than(int v):val(v) {}
+    bool operator()(const int& i) {return i>val;}
+};
+
+/* INSERTION (for std::vector and std::list) */
 template<typename Con, typename Ele>
 void insert_to_seq(Con& to, vector<Ele>& from)
 {
     for (auto i:from) {
         /* 
-         * Bianry search for the index of insertion point
-         */
-        //auto indx = binary_search_in_seq(to, i, to.begin(), to.end());
-        /* 
-         * or,
-         * Linear search for the index of insertion point
+         * 1. Linear search for the index of insertion point
          */
         auto indx = linear_search_in_seq(to, i, to.begin(), to.end());
+
+        /* 
+         * 2. Bianry search for the index of insertion point
+         */
+        //auto indx = binary_search_in_seq(to, i, to.begin(), to.end());
+
+        /* 
+         * 3. Using find_if and Lambda function
+         */
+        //auto indx = find_if(to.begin(), to.end(), [i](const int& v) {return v>i;});
+
+        /* 
+         * 4. Using find_if and function object
+         */
+        //auto indx = find_if(to.begin(), to.end(), Greater_than{i});
+
         to.insert(indx, i);
     }
 }
 
+template<typename Ele, typename Con>
+void vector_insert_then_sort(vector<Ele>& to, Con& from)
+{
+    for (auto i:from) {
+        to.push_back(i);
+        sort(to.begin(), to.end());
+    }
+}
+
+template<typename Ele, typename Con>
+void list_insert_then_sort(list<Ele>& to, Con& from)
+{
+    for (auto i:from) {
+        to.push_back(i);
+        to.sort();
+    }
+}
+
+/* INSERTION (for std::set) */
 template<typename Ele>
 void insert_to_set(set<Ele>& to, vector<Ele>& from)
 {
@@ -87,17 +126,27 @@ void insert_to_set(set<Ele>& to, vector<Ele>& from)
         to.insert(i);
 }
 
+/* DELETION */
 template<typename Con>
 void remove_from_seq(Con& from, vector<int>& index)
 {
     for (int i:index) {
         auto it = from.begin();
+        /* 1. explicit loop */
         for (int c = 0; c < i; c++)
             it++;
+
+        /* 2. std::advance() */
+        //advance(it, i);
+
         from.erase(it);
     }
 }
 
+/*
+ * Single run
+ * Input: (int)max, maximum integer, i.e. size
+ */
 void run(int max)
 {
     cout << max << ",";
@@ -112,71 +161,55 @@ void run(int max)
     auto t = chrono::high_resolution_clock::now();
     vector<int> v {};
     gen_random_seq(v, max, rng);
-#if 0
-    for (auto i = v.begin(); i < v.begin()+10; i++)
-        cout << *i << endl;
-#endif
 
+    /* generate the random deletion sequence */
     vector<int> rm_index {};
     gen_random_index(rm_index, max, rng);
-#if 0
-    for (auto i = rm_index.begin(); i < rm_index.end(); i++)
-        cout << *i << endl;
-#endif
     cout << time_stamp(t) << ",";
 
-    /**********
-     * Vector *
-     **********/
-    vector<int> vec {};
+
+    /***************
+     * std::vector *
+     ***************/
+    vector<int> vec;
+    
     insert_to_seq(vec, v);
-#if 0
-    for (auto i = vec.begin(); i != vec.end(); i++)
-        cout << *i << endl;
-#endif
+    //vector_insert_then_sort(vec, v);
     cout << time_stamp(t) << ",";
 
     remove_from_seq(vec, rm_index);
-#if 0
-    cout << "empty: " << vec.empty() << endl;
-#endif
     cout << time_stamp(t) << ",";
  
-    /********
-     * List *
-     ********/
-    list<int> lst {};
+
+    /*************
+     * std::list *
+     *************/
+    list<int> lst;
+    
     insert_to_seq(lst, v);
-#if 0
-    for (auto i = lst.begin(); i != lst.end(); i++)
-        cout << *i << endl;
-#endif
+    //list_insert_then_sort(lst, v);
     cout << time_stamp(t) << ",";
 
     remove_from_seq(lst, rm_index);
-#if 0
-    cout << "empty: " << lst.empty() << endl;
-#endif
     cout << time_stamp(t) << ",";
 
-    /*******
-     * Set *
-     *******/
-    set<int> st {};
+
+    /************
+     * std::set *
+     ************/
+    set<int> st;
+
     insert_to_set(st, v);
-#if 0
-    for (auto i = st.begin(); i != st.end(); i++)
-        cout << *i << endl;
-#endif
     cout << time_stamp(t) << ",";
  
     remove_from_seq(st, rm_index);
-#if 0
-    cout << "empty: " << st.empty() << endl;
-#endif
     cout << time_stamp(t) << endl;
 }
 
+
+/****************************************
+ <<<<<<<<<<<<<<   MAIN  >>>>>>>>>>>>>>>>
+****************************************/
 int main(int argc, char* argv[])
 {
     /* specified maximum number, single-time mode */
@@ -185,9 +218,8 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    cout << "size,prepare,vect-in,vect-out,list-in,list-out\n";
+    cout << "size,prepare,vect-in,vect-out,list-in,list-out,set-in,set-out\n";
     vector<int> vmax {10, 500, 2000, 10000, 50000, 100000, 200000};
-    //vector<int> vmax {10, 500, 2000};
     constexpr int rep = 3;
 
     for (auto m:vmax) {
