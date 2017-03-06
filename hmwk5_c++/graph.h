@@ -4,13 +4,17 @@
 #include <string>
 #include <utility>
 #include <memory>
+#include <set>
+#include <map>
+#include <vector>
 #include "concepts.h"
 
 using namespace std;
 
 typedef pair<string,int> Val;
 
-struct vertex {
+struct vertex 
+{
     Val val;
     
     vertex(void) { val = make_pair("NULL", -1); }
@@ -19,44 +23,141 @@ struct vertex {
     Val value(void) { return val; }
     void set_value(Val v) { val = v; }
 
-    string to_string(void) {
+    string to_string(void) 
+    {
         return "[(" + get<0>(val) + ")::(" + std::to_string(get<1>(val)) + ")]";
     }
 };
-typedef shared_ptr<vertex> vertex_ptr;
+typedef shared_ptr<vertex> Vertex_ptr;
 
-struct directed_edge {
+struct directed_edge 
+{
     Val val;
-    vertex_ptr v_from, v_to;
+    Vertex_ptr v_from, v_to;
 
-    directed_edge(void) {
+    directed_edge(void) 
+    {
         val = make_pair("NULL-->NULL", -1);
     }
-    directed_edge(vertex_ptr from, vertex_ptr to, int v=-1) {
+    directed_edge(Vertex_ptr from, Vertex_ptr to, int v=-1) 
+    {
         v_from = from;
         v_to = to;
         val = make_pair(from->to_string() + "-->" + to->to_string(), v);
     }
-    directed_edge(vertex_ptr from, vertex_ptr to, Val v) {
+    directed_edge(Vertex_ptr from, Vertex_ptr to, Val v) 
+    {
         v_from = from;
         v_to = to;
         val = v;
     }
 
-    bool contain(vertex_ptr vp) { return v_from == vp || v_to == vp; }
-    bool is_from(vertex_ptr vp) { return v_from == vp; }
-    bool is_to(vertex_ptr vp) { return v_to == vp; }
+    bool contain(Vertex_ptr vp) { return v_from == vp || v_to == vp; }
+    bool is_from(Vertex_ptr vp) { return v_from == vp; }
+    bool is_to(Vertex_ptr vp) { return v_to == vp; }
 
-    vertex_ptr from(void) { return v_from; }
-    vertex_ptr to(void) { return v_to; }
+    Vertex_ptr from(void) { return v_from; }
+    Vertex_ptr to(void) { return v_to; }
 
     Val value(void) { return val; }
     void set_value(Val v) { val = v; }
 
-    string to_string(void) {
+    string to_string(void) 
+    {
         return "{(" + get<0>(val) + ")::(" + std::to_string(get<1>(val)) + ")}";
     }
 };
-typedef shared_ptr<directed_edge> edge_ptr;
+typedef shared_ptr<directed_edge> Edge_ptr;
+
+inline bool operator< (const Vertex_ptr lvp, const Vertex_ptr rvp) 
+{
+    return get<1>(lvp->value()) < get<1>(rvp->value());
+}
+inline bool operator< (const Edge_ptr lep, const Edge_ptr rep) 
+{
+    return get<1>(lep->value()) < get<1>(rep->value());
+}
+
+typedef std::set<Vertex_ptr> Graph_vertices;
+typedef std::map<Vertex_ptr, std::set<Edge_ptr>> Graph_edges;
+struct base_graph 
+{
+    Graph_vertices vertices;
+    Graph_edges edges;
+    // void add(Vertex_ptr vp) { vertices.insert(vp); }
+
+    string vertices_to_string(void)
+    {
+        string s = "";
+        int c = 0;
+        for (auto v : vertices) {
+            s += v->to_string() + "  ";
+            if (++c % 9 == 0)
+                s += "\n";
+        }
+        return s;
+    }
+
+    string edges_to_string(void)
+    {
+        string s = "";
+        int c = 0;
+        for (auto em : edges) {
+            for (auto e : em.second) {
+                s += e->to_string() + "  ";
+                if (++c % 3 == 0)
+                    s += "\n";
+            }
+        }
+        return s;
+    }
+};
+
+struct directed_graph 
+{
+    base_graph bg;
+
+    Graph_vertices& vertices() { return bg.vertices; }
+    Graph_edges& edges() { return bg.edges; }
+
+    string to_string(void) 
+    {
+        return "\nVERTICES:\n" + bg.vertices_to_string() + \
+         "\nEDGES:\n" + bg.edges_to_string();
+    }
+};
+
+struct directed_acyclic_graph 
+{
+    base_graph bg;
+
+    Graph_vertices& vertices(void) { return bg.vertices; }
+    Graph_edges& edges(void) { return bg.edges; }
+
+    std::vector<Vertex_ptr> topological_order(void);
+
+    string to_string(void) 
+    {
+        return "dag";
+    }
+};
+
+struct directed_tree
+{
+    base_graph bg;
+    Vertex_ptr root_node = NULL;
+
+    Graph_vertices& vertices(void) { return bg.vertices; }
+    Graph_edges& edges(void) { return bg.edges; }
+
+    Vertex_ptr root(void) { return root_node; }
+    void set_root(Vertex_ptr vp) { root_node = vp; }
+    bool has_root(void) { return root_node != NULL; }
+
+    string to_string(void) 
+    {
+        return "dt";
+    }
+};
 
 #endif

@@ -15,17 +15,21 @@ int main(int argc, char* argv[])
 {
     // vertex bv;
     // cout << fun(bv) << endl;
-    vertex_ptr vp(new vertex(make_pair("v1", 1)));
-    cout << vp->to_string() << endl;
+    Vertex_ptr vp1(new vertex(make_pair("v1", 1)));
+    // cout << vp1->to_string() << endl;
 
-    vertex_ptr vp1(new vertex(make_pair("v2", 2)));
-    cout << vp1->to_string() << endl;
+    Vertex_ptr vp2(new vertex(make_pair("v2", 2)));
+    // cout << vp2->to_string() << endl;
 
-    edge_ptr ep(new directed_edge(vp, vp1));
-    cout << ep->to_string() << endl;
+    Edge_ptr ep(new directed_edge(vp1, vp2));
+    // cout << ep->to_string() << endl;
 
-    cout << vp << endl;
-    cout << ep->is_to(vp) << endl;
+    // cout << vp << endl;
+    // cout << ep->is_to(vp) << endl;
+
+    directed_graph dg;
+    add(dg, vp1);
+    cout << dg.to_string() << endl;
 
     return 0;
 }
