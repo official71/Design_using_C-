@@ -29,7 +29,11 @@ int main(int argc, char* argv[])
 
     directed_graph dg;
     add(dg, vp1);
-    cout << dg.to_string() << endl;
+    add(dg, vp2);
+    // auto nep = add_edge(dg, vp1, vp2, 100);
+    add_edge(dg, ep);
+    // add_edge(dg, nep);
+    _DEBUG("debug ", dg.to_string());
 
     return 0;
 }

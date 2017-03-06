@@ -2,7 +2,8 @@
 
 PROG = run
 CC = g++
-CPPFLAGS = -std=c++1z -fconcepts -Wall
+CPPFLAGS = -std=c++1z -fconcepts -Wall -DDEBUG
+#CPPFLAGS = -std=c++1z -fconcepts -Wall 
 OBJS = main.o
 
 $(PROG) : $(OBJS)

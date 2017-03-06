@@ -11,6 +11,26 @@
 
 using namespace std;
 
+#ifdef DEBUG
+void _log() {}
+template<typename Head, typename ...Rest>
+void _log(Head && h, Rest && ...r)
+{
+    std::cout << std::forward<Head>(h);
+    _log(std::forward<Rest>(r)...);
+}
+#define _DEBUG(...) do\
+{\
+    std::cout << "[ " << __FILE__;\
+    std::cout << " -> " << __FUNCTION__;\
+    std::cout << " -> " << __LINE__ << " ] ";\
+    _log(__VA_ARGS__);\
+    std::cout << endl;\
+} while(0)
+#else
+#define _DEBUG(...) do{} while(0)
+#endif
+
 typedef pair<string,int> Val;
 
 struct vertex 
@@ -79,11 +99,13 @@ inline bool operator< (const Edge_ptr lep, const Edge_ptr rep)
 }
 
 typedef std::set<Vertex_ptr> Graph_vertices;
+typedef std::set<Edge_ptr> Set_edges;
 typedef std::map<Vertex_ptr, std::set<Edge_ptr>> Graph_edges;
 struct base_graph 
 {
     Graph_vertices vertices;
-    Graph_edges edges;
+    Graph_edges edges_from;
+    Graph_edges edges_to;
     // void add(Vertex_ptr vp) { vertices.insert(vp); }
 
     string vertices_to_string(void)
@@ -98,11 +120,11 @@ struct base_graph
         return s;
     }
 
-    string edges_to_string(void)
+    string edges_to_string(Graph_edges& ge)
     {
         string s = "";
         int c = 0;
-        for (auto em : edges) {
+        for (auto em : ge) {
             for (auto e : em.second) {
                 s += e->to_string() + "  ";
                 if (++c % 3 == 0)
@@ -118,12 +140,14 @@ struct directed_graph
     base_graph bg;
 
     Graph_vertices& vertices() { return bg.vertices; }
-    Graph_edges& edges() { return bg.edges; }
+    Graph_edges& edges_from() { return bg.edges_from; }
+    Graph_edges& edges_to() { return bg.edges_to; }
 
-    string to_string(void) 
+    string to_string() 
     {
-        return "\nVERTICES:\n" + bg.vertices_to_string() + \
-         "\nEDGES:\n" + bg.edges_to_string();
+        return "\nTYPE: Directed Graph" \
+         "\nVERTICES:\n" + bg.vertices_to_string() + \
+         "\nEDGES:\n" + bg.edges_to_string(edges_from());
     }
 };
 
@@ -131,14 +155,17 @@ struct directed_acyclic_graph
 {
     base_graph bg;
 
-    Graph_vertices& vertices(void) { return bg.vertices; }
-    Graph_edges& edges(void) { return bg.edges; }
+    Graph_vertices& vertices() { return bg.vertices; }
+    Graph_edges& edges_from() { return bg.edges_from; }
+    Graph_edges& edges_to() { return bg.edges_to; }
 
-    std::vector<Vertex_ptr> topological_order(void);
+    std::vector<Vertex_ptr> topological_order();
 
-    string to_string(void) 
+    string to_string() 
     {
-        return "dag";
+        return "\nTYPE: Directed Acyclic Graph" \
+         "\nVERTICES:\n" + bg.vertices_to_string() + \
+         "\nEDGES:\n" + bg.edges_to_string(edges_from());
     }
 };
 
@@ -147,16 +174,19 @@ struct directed_tree
     base_graph bg;
     Vertex_ptr root_node = NULL;
 
-    Graph_vertices& vertices(void) { return bg.vertices; }
-    Graph_edges& edges(void) { return bg.edges; }
+    Graph_vertices& vertices() { return bg.vertices; }
+    Graph_edges& edges_from() { return bg.edges_from; }
+    Graph_edges& edges_to() { return bg.edges_to; }
 
-    Vertex_ptr root(void) { return root_node; }
+    Vertex_ptr root() { return root_node; }
     void set_root(Vertex_ptr vp) { root_node = vp; }
-    bool has_root(void) { return root_node != NULL; }
+    bool has_root() { return root_node != NULL; }
 
-    string to_string(void) 
+    string to_string() 
     {
-        return "dt";
+        return "\nTYPE: Directed Tree" \
+         "\nVERTICES:\n" + bg.vertices_to_string() + \
+         "\nEDGES:\n" + bg.edges_to_string(edges_from());
     }
 };
 
