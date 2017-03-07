@@ -10,7 +10,6 @@ using namespace std;
 // int fun(Vertex v) { return v.value().second; }
 
 bool adjacent(DG dg, Vertex_ptr x, Vertex_ptr y);
-Graph_vertices neighbors(DG dg, Vertex_ptr x);
 
 /* add vertex */
 void add(DG & dg, Vertex_ptr x)
@@ -20,45 +19,47 @@ void add(DG & dg, Vertex_ptr x)
         return;
     }
 
-    Graph_vertices& gv = dg.vertices();
-    gv.insert(x);
+    dg.vertices_insert(x);
 }
 
 /* add edge */
-void add_edge(DG & dg, Edge_ptr e, Vertex_ptr x, Vertex_ptr y)
+void add_edge(DG & dg, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
 {
-    if (!x || !y || !e) {
+    if (!from || !to || !e) {
         _DEBUG("NULL vertices or edge ptr.");
         return;
     }
-    if (!e->contain(x) || !e->contain(y)) {
-        _DEBUG("Input edge does not contain input vertices.");
+    if (!e->is_from(from) || !e->is_to(to)) {
+        _DEBUG("Input edge does not match input vertices.");
         return;
     }
 
-    /* add the edge to graph.edges (both from and to sets) */
-    Graph_edges& ge_from = dg.edges_from();
-    Graph_edges& ge_to = dg.edges_to();
+    dg.edges_from_insert(from, e);
+    dg.edges_to_insert(to, e);
 
-    auto search_from = ge_from.find(x);
-    if (search_from == ge_from.end()) {
-        _DEBUG("First from_edge for vertex: ", x->to_string());
-        ge_from.insert(make_pair(x, Set_edges{e}));
-    } else {
-        search_from->second.insert(e);
-    }
+    // /* add the edge to graph.edges (both from and to sets) */
+    // Graph_edges& ge_from = dg.edges_from();
+    // Graph_edges& ge_to = dg.edges_to();
 
-    auto search_to = ge_to.find(y);
-    if (search_to == ge_to.end()) {
-        _DEBUG("First to_edge for vertex: ", y->to_string());
-        ge_to.insert(make_pair(y, Set_edges{e}));
-    } else {
-        search_to->second.insert(e);
-    }
+    // auto search = ge_from.find(x);
+    // if (search == ge_from.end()) {
+    //     _DEBUG("First from_edge for vertex: ", x->to_string());
+    //     ge_from.insert(make_pair(x, Set_edges{e}));
+    // } else {
+    //     search->second.insert(e);
+    // }
+
+    // search = ge_to.find(y);
+    // if (search == ge_to.end()) {
+    //     _DEBUG("First to_edge for vertex: ", y->to_string());
+    //     ge_to.insert(make_pair(y, Set_edges{e}));
+    // } else {
+    //     search->second.insert(e);
+    // }
 
     /* add the vertices to graph.vertices if not exist */
-    add(dg, x);
-    add(dg, y);
+    add(dg, from);
+    add(dg, to);
 }
 
 void add_edge(DG & dg, Edge_ptr e)
@@ -90,5 +91,172 @@ Edge_ptr add_edge(DG & dg, Vertex_ptr x, Vertex_ptr y, T val)
     add_edge(dg, e, x, y);
     return e;
 }
+
+/* find edge */
+Edge_ptr find_edge(DG & dg, Vertex_ptr from, Vertex_ptr to)
+{
+    if (!from || !to) {
+        _DEBUG("NULL vertices ptr.");
+        return NULL;
+    }
+
+    Edge_ptr ptr = dg.edges_from_find(from, to);
+
+    // Edge_ptr ptr = NULL;
+
+    // Graph_edges& ge_from = dg.edges_from();
+    // auto search_from = ge_from.find(x);
+    // if (search_from == ge_from.end()) {
+    //     _DEBUG("Graph does not contain vertex: ", x->to_string());
+    //     return NULL;
+    // } else {
+    //     Set_edges& se = search_from->second;
+    //     for (auto p : se) {
+    //         if (p->to() == y) {
+    //             ptr = p;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    if (ptr)
+        return ptr;
+
+    _DEBUG("There is nothing found in the from set, try the to set.");
+
+    ptr = dg.edges_to_find(from, to);
+
+    // Graph_edges& ge_to = dg.edges_to();
+    // auto search_to = ge_to.find(y);
+    // if (search_to == ge_to.end()) {
+    //     _DEBUG("Graph does not contain vertex: ", y->to_string());
+    //     return NULL;
+    // } else {
+    //     Set_edges& se = search_to->second;
+    //     for (auto p : se) {
+    //         if (p->from() == x) {
+    //             ptr = p;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    if (ptr)
+        _DEBUG("ABNORMAL ACTIVITY: edge only exists in the edges_to set.");
+    return ptr;
+}
+
+/* neighbors */
+Graph_vertices neighbors_from(DG dg, Vertex_ptr v_from)
+{
+    Graph_vertices rv {};
+
+    Graph_edges& ge = dg.edges_from();
+    auto search = ge.find(v_from);
+    if (search == ge.end()) {
+        _DEBUG("Graph does not contain edges from vertex: ", v_from->to_string());
+        return rv;
+    }
+
+    Set_edges& se = search->second;
+    for (auto e : se)
+        rv.insert(e->to());
+    return rv;
+}
+
+Graph_vertices neighbors_to(DG dg, Vertex_ptr v_to)
+{
+    Graph_vertices rv {};
+
+    Graph_edges& ge = dg.edges_to();
+    auto search = ge.find(v_to);
+    if (search == ge.end()) {
+        _DEBUG("Graph does not contain edges to vertex: ", v_to->to_string());
+        return rv;
+    }
+
+    Set_edges& se = search->second;
+    for (auto e : se)
+        rv.insert(e->from());
+    return rv;
+}
+
+Graph_vertices neighbors(DG dg, Vertex_ptr x)
+{
+    Graph_vertices from = neighbors_from(dg, x);
+    Graph_vertices to = neighbors_to(dg, x);
+
+    from.insert(to.begin(), to.end());
+    return from;
+}
+
+/* remove edge */
+Edge_ptr remove_edge(DG & dg, Vertex_ptr from, Vertex_ptr to, Edge_ptr e = NULL)
+{
+    if (!from || !to) {
+        _DEBUG("NULL vertices ptr.");
+        return NULL;
+    }
+
+    if (!e) {
+        /* edge ptr not specified, find it */
+        e = find_edge(dg, from, to);
+        if (!e)
+            return NULL;
+    }
+
+    if (!e->is_from(from) || !e->is_to(to)) {
+        _DEBUG("Input edge does not match input vertices.");
+        return NULL;
+    }
+
+    dg.edges_from_erase(from, e);
+    dg.edges_to_erase(to, e);
+
+    // /* remove the edge from graph.edges (both from and to sets) */
+    // Graph_edges& ge_from = dg.edges_from();
+    // Graph_edges& ge_to = dg.edges_to();
+
+    // auto search_from = ge_from.find(x);
+    // if (search_from == ge_from.end()) {
+    //     _DEBUG("Graph does not contain vertex: ", x->to_string());
+    // } else {
+    //     Set_edges& se = search_from->second;
+    //     auto search = se.find(e);
+    //     if (search != se.end())
+    //         se.erase(search);
+    // }
+
+    // auto search_to = ge_to.find(y);
+    // if (search_to == ge_to.end()) {
+    //     _DEBUG("Graph does not contain vertex: ", y->to_string());
+    // } else {
+    //     Set_edges& se = search_to->second;
+    //     auto search = se.find(e);
+    //     if (search != se.end())
+    //         se.erase(search);
+    // }
+
+    return e;
+}
+
+Edge_ptr remove_edge(DG & dg, Edge_ptr e)
+{
+    if (!e) {
+        _DEBUG("NULL edge ptr.");
+        return NULL;
+    }
+
+    Vertex_ptr v_from = e->from();
+    Vertex_ptr v_to = e->to();
+    if (!v_from || !v_to) {
+        _DEBUG("NULL vertices.");
+        return NULL;
+    }
+
+    return remove_edge(dg, v_from, v_to, e);
+}
+
+/* remove vertex */
 
 #endif

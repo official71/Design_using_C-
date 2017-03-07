@@ -104,9 +104,87 @@ typedef std::map<Vertex_ptr, std::set<Edge_ptr>> Graph_edges;
 struct base_graph 
 {
     Graph_vertices vertices;
-    Graph_edges edges_from;
-    Graph_edges edges_to;
+    Graph_edges edges_from; /* mapping vertex A and all edges A --> ?? */
+    Graph_edges edges_to;   /* mapping vertex A and all edges ?? --> A */
     // void add(Vertex_ptr vp) { vertices.insert(vp); }
+
+    void vertices_insert(Vertex_ptr v) { vertices.insert(v); }
+    void vertices_erase(Vertex_ptr v) { vertices.erase(v); }
+
+    void edges_from_insert(Vertex_ptr f, Edge_ptr e)
+    {
+        auto search = edges_from.find(f);
+        if (search == edges_from.end())
+            edges_from.insert(make_pair(f, Set_edges{e}));
+        else
+            search->second.insert(e);
+    }
+    void edges_to_insert(Vertex_ptr t, Edge_ptr e)
+    {
+        auto search = edges_to.find(t);
+        if (search == edges_to.end())
+            edges_to.insert(make_pair(t, Set_edges{e}));
+        else
+            search->second.insert(e);
+    }
+
+    Edge_ptr edges_from_find(Vertex_ptr f, Vertex_ptr t)
+    {
+        Edge_ptr ptr = NULL;
+
+        auto search = edges_from.find(f);
+        if (search == edges_from.end())
+            return NULL;
+        
+        for (auto p : search->second) {
+            if (p->to() == t) {
+                ptr = p;
+                break;
+            }
+        }
+        return ptr;
+    }
+    Edge_ptr edges_to_find(Vertex_ptr f, Vertex_ptr t)
+    {
+        Edge_ptr ptr = NULL;
+
+        auto search = edges_to.find(f);
+        if (search == edges_to.end())
+            return NULL;
+        
+        for (auto p : search->second) {
+            if (p->to() == t) {
+                ptr = p;
+                break;
+            }
+        }
+        return ptr;
+    }
+
+    void edges_from_erase(Vertex_ptr f, Edge_ptr e)
+    {
+        auto search = edges_from.find(f);
+        if (search != edges_from.end())
+            search->second.erase(e);
+    }
+    void edges_to_erase(Vertex_ptr t, Edge_ptr e)
+    {
+        auto search = edges_to.find(t);
+        if (search != edges_to.end())
+            search->second.erase(e);
+    }
+
+    void edges_from_to_erase(Vertex_ptr f, Vertex_ptr t)
+    {
+        Edge_ptr e = edges_from_find(f, t);
+        if (!e)
+            e = edges_to_find(f, t);
+        if (!e)
+            return;
+
+        edges_from_erase(f, e);
+        edges_to_erase(t, e);
+    }
 
     string vertices_to_string(void)
     {
@@ -142,6 +220,20 @@ struct directed_graph
     Graph_vertices& vertices() { return bg.vertices; }
     Graph_edges& edges_from() { return bg.edges_from; }
     Graph_edges& edges_to() { return bg.edges_to; }
+
+    void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
+    void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }
+
+    void edges_from_insert(Vertex_ptr f, Edge_ptr e) { bg.edges_from_insert(f, e); }
+    void edges_to_insert(Vertex_ptr t, Edge_ptr e) { bg.edges_to_insert(t, e); }
+
+    Edge_ptr edges_from_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_from_find(f, t); }
+    Edge_ptr edges_to_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_to_find(f, t); }
+    Edge_ptr edges_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_from_find(f, t); }
+
+    void edges_from_erase(Vertex_ptr f, Edge_ptr e) { bg.edges_from_erase(f, e); }
+    void edges_to_erase(Vertex_ptr t, Edge_ptr e) { bg.edges_to_erase(t, e); }
+    void edges_erase(Vertex_ptr f, Vertex_ptr t) { bg.edges_from_to_erase(f, t); }
 
     string to_string() 
     {
