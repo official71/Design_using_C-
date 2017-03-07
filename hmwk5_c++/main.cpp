@@ -30,8 +30,85 @@ void try_copy(directed_graph& dg, Vertex_ptr vp1)
     _DEBUG("Step 2.5: ", dg.to_string());
 }
 
+void try_dfs()
+{
+    Vertex_ptr a(new vertex(make_pair("a", 1)));
+    Vertex_ptr b(new vertex(make_pair("b", 2)));
+    Vertex_ptr c(new vertex(make_pair("c", 3)));
+    Vertex_ptr d(new vertex(make_pair("d", 4)));
+    Vertex_ptr e(new vertex(make_pair("e", 5)));
+    Vertex_ptr f(new vertex(make_pair("f", 6)));
+    Vertex_ptr g(new vertex(make_pair("g", 7)));
+    Vertex_ptr h(new vertex(make_pair("h", 8)));
+    Vertex_ptr i(new vertex(make_pair("i", 9)));
+
+    directed_graph dg;
+    add(dg, a);
+    add(dg, b);
+    add(dg, c);
+    add(dg, d);
+    add(dg, e);
+    add(dg, f);
+    add(dg, g);
+    add(dg, h);
+    add(dg, i);
+
+    auto ab = add_edge(dg, a, b, 100);
+    auto bc = add_edge(dg, b, c, 200);
+    auto cd = add_edge(dg, c, d, 300);
+    auto ce = add_edge(dg, c, e, 400);
+    auto bf = add_edge(dg, b, f, 500);
+    auto fg = add_edge(dg, f, g, 600);
+    auto gh = add_edge(dg, g, h, 700);
+    auto fi = add_edge(dg, f, i, 800);
+    /* this looks like a cycle but is not */
+    auto ig = add_edge(dg, i, g, 900);
+    /* cyclic now */
+    auto eb = add_edge(dg, e, b, 1000);
+
+    _DEBUG("Graph bg: ", dg.to_string());
+
+    depth_first_search DFS(dg.base());
+    _DEBUG("DFS created... try cyclic: ", DFS.is_cyclic());
+
+    DFS.dfs();
+    _DEBUG("Retry cyclic: ", DFS.is_cyclic());
+
+    // int num_cycles();
+    // map<int, vector<Vertex_ptr>> get_cycles();
+    // map<Vertex_ptr, pair<int, int>> get_orders();
+    // map<Vertex_ptr, Vertex_ptr> get_parents();
+
+    auto nr_cycles = DFS.num_cycles();
+    _DEBUG("nr_cycles = ", std::to_string(nr_cycles));
+
+    auto cycles = DFS.get_cycles();
+    for (auto cp : cycles) {
+        _DEBUG("Cycle: ", std::to_string(cp.first));
+        for (auto v : cp.second) {
+            _DEBUG("    ", v->to_string());
+        }
+    }
+
+    auto orders = DFS.get_orders();
+    for (auto op : orders) {
+        _DEBUG("order of ", op.first->to_string(), ": ", \
+            std::to_string(op.second.first), ",\t", \
+            std::to_string(op.second.second));
+    }
+
+    auto parents = DFS.get_parents();
+    for (auto pp : parents) {
+        string str = pp.second ? pp.second->to_string() : "NULL";
+        _DEBUG("parent of ", pp.first->to_string(), ": ", str);
+    }
+
+}
+
 int main(int argc, char* argv[])
 {
+    try_dfs();
+#if 0
     // vertex bv;
     // cout << fun(bv) << endl;
     Vertex_ptr vp1(new vertex(make_pair("v1", 1)));
@@ -41,6 +118,7 @@ int main(int argc, char* argv[])
     // cout << vp2->to_string() << endl;
 
     Vertex_ptr vp3(new vertex(make_pair("v3", 2)));
+    Vertex_ptr vp4(new vertex(make_pair("v4", 5100)));
 
     Edge_ptr ep12(new directed_edge(vp1, vp2));
     // cout << ep->to_string() << endl;
@@ -64,18 +142,12 @@ int main(int argc, char* argv[])
 
     // directed_graph copy_dg(dg.base());
     // _DEBUG("COPY: ", copy_dg.to_string());
-    try_copy(dg, vp1);
-    _DEBUG("Step 3: ", dg.to_string());
-
-    // remove_edge(dg, ep21);
-    // clear_edges_of(dg, vp1);
-    // remove(dg, vp1);
-    // _DEBUG("Step 2: ", dg.to_string());
-
-    // remove_edge(dg, vp3, vp2);
+    // try_copy(dg, vp1);
     // _DEBUG("Step 3: ", dg.to_string());
 
-    // _DEBUG("COPY Step 2: ", copy_dg.to_string());
-
+    directed_acyclic_graph dag(dg.base());
+    add(dag, vp4);
+    _DEBUG("DAG: ", dag.to_string());
+#endif
     return 0;
 }

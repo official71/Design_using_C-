@@ -311,4 +311,16 @@ void remove(DG & dg, Vertex_ptr x)
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
+void add(DAG & dag, Vertex_ptr x)
+{
+    _DEBUG("DAG VERSION");
+    if (!x) {
+        _DEBUG("NULL Vertex_ptr.");
+        return;
+    }
+
+    dag.vertices_insert(x);
+}
+
 #endif
