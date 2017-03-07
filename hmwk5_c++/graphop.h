@@ -6,10 +6,16 @@
 
 using namespace std;
 
-// template<Vertex V>
-// int fun(Vertex v) { return v.value().second; }
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ * BEGIN:   Operations for General Directed Graph
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-bool adjacent(DG dg, Vertex_ptr x, Vertex_ptr y);
+bool adjacent(DG dg, Vertex_ptr x, Vertex_ptr y)
+{
+    return (dg.edges_find(x, y) != NULL || dg.edges_find(y, x) != NULL);
+}
 
 /* add vertex */
 void add(DG & dg, Vertex_ptr x)
@@ -147,14 +153,14 @@ Edge_ptr find_edge(DG & dg, Vertex_ptr from, Vertex_ptr to)
 }
 
 /* neighbors */
-Graph_vertices neighbors_from(DG dg, Vertex_ptr v_from)
+Graph_vertices neighbors_from(DG dg, Vertex_ptr from)
 {
     Graph_vertices rv {};
 
     Graph_edges& ge = dg.edges_from();
-    auto search = ge.find(v_from);
+    auto search = ge.find(from);
     if (search == ge.end()) {
-        _DEBUG("Graph does not contain edges from vertex: ", v_from->to_string());
+        _DEBUG("Graph does not contain edges from vertex: ", from->to_string());
         return rv;
     }
 
@@ -164,14 +170,14 @@ Graph_vertices neighbors_from(DG dg, Vertex_ptr v_from)
     return rv;
 }
 
-Graph_vertices neighbors_to(DG dg, Vertex_ptr v_to)
+Graph_vertices neighbors_to(DG dg, Vertex_ptr to)
 {
     Graph_vertices rv {};
 
     Graph_edges& ge = dg.edges_to();
-    auto search = ge.find(v_to);
+    auto search = ge.find(to);
     if (search == ge.end()) {
-        _DEBUG("Graph does not contain edges to vertex: ", v_to->to_string());
+        _DEBUG("Graph does not contain edges to vertex: ", to->to_string());
         return rv;
     }
 
@@ -257,6 +263,52 @@ Edge_ptr remove_edge(DG & dg, Edge_ptr e)
     return remove_edge(dg, v_from, v_to, e);
 }
 
+void clear_edges_from(DG & dg, Vertex_ptr from)
+{
+    if (!from) {
+        _DEBUG("NULL vertices.");
+        return;
+    }
+
+    Graph_vertices set_to = neighbors_from(dg, from);
+    for (auto to : set_to)
+        dg.edges_erase(from, to);
+}
+
+void clear_edges_to(DG & dg, Vertex_ptr to)
+{
+    if (!to) {
+        _DEBUG("NULL vertices.");
+        return;
+    }
+
+    Graph_vertices set_from = neighbors_to(dg, to);
+    for (auto from : set_from)
+        dg.edges_erase(from, to);
+}
+
+void clear_edges_of(DG & dg, Vertex_ptr x)
+{
+    clear_edges_from(dg, x);
+    clear_edges_to(dg, x);
+}
+
 /* remove vertex */
+void remove(DG & dg, Vertex_ptr x)
+{
+    if (!x) {
+        _DEBUG("NULL vertices.");
+        return;
+    }
+
+    clear_edges_of(dg, x);
+    dg.vertices_erase(x);
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ * END:   Operations for General Directed Graph
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif

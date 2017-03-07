@@ -11,6 +11,25 @@ using namespace std;
 //     cout << gv.to_string() << endl;
 // }
 
+void try_copy(directed_graph& dg, Vertex_ptr vp1)
+{
+    directed_graph copy_dg(dg.base());
+    _DEBUG("COPY: ", copy_dg.to_string());
+
+    // remove_edge(dg, ep21);
+    // clear_edges_of(dg, vp1);
+    remove(copy_dg, vp1);
+    _DEBUG("Step 2: ", dg.to_string());
+
+    // remove_edge(dg, vp3, vp2);
+    // _DEBUG("Step 3: ", dg.to_string());
+
+    _DEBUG("COPY Step 2: ", copy_dg.to_string());
+
+    dg.copy_base(copy_dg.base());
+    _DEBUG("Step 2.5: ", dg.to_string());
+}
+
 int main(int argc, char* argv[])
 {
     // vertex bv;
@@ -38,15 +57,25 @@ int main(int argc, char* argv[])
     auto ep32 = add_edge(dg, vp3, vp2, 3);
     // add_edge(dg, ep2);
     _DEBUG("Step 1: ", dg.to_string());
+    // _DEBUG("Adj: ", adjacent(dg, vp3, vp2));
 
     // for (auto v : neighbors(dg, vp3))
     //     _DEBUG("nb: ", v->to_string());
 
-    remove_edge(dg, ep21);
-    _DEBUG("Step 2: ", dg.to_string());
-
-    remove_edge(dg, vp3, vp2);
+    // directed_graph copy_dg(dg.base());
+    // _DEBUG("COPY: ", copy_dg.to_string());
+    try_copy(dg, vp1);
     _DEBUG("Step 3: ", dg.to_string());
+
+    // remove_edge(dg, ep21);
+    // clear_edges_of(dg, vp1);
+    // remove(dg, vp1);
+    // _DEBUG("Step 2: ", dg.to_string());
+
+    // remove_edge(dg, vp3, vp2);
+    // _DEBUG("Step 3: ", dg.to_string());
+
+    // _DEBUG("COPY Step 2: ", copy_dg.to_string());
 
     return 0;
 }

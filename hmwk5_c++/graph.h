@@ -217,6 +217,18 @@ struct directed_graph
 {
     base_graph bg;
 
+    directed_graph() {}
+    directed_graph(base_graph& base): bg(base)
+    {
+        _DEBUG("<directed_graph> constructor using base_graph&");
+    }
+
+    void copy_base(base_graph& base)
+    {
+        bg = base;
+    }
+
+    base_graph& base() { return bg; }
     Graph_vertices& vertices() { return bg.vertices; }
     Graph_edges& edges_from() { return bg.edges_from; }
     Graph_edges& edges_to() { return bg.edges_to; }
