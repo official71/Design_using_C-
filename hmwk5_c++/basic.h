@@ -116,13 +116,18 @@ inline bool operator< (const Edge_ptr lep, const Edge_ptr rep)
 
 
 
-
+class depth_first_search;
 
 struct base_graph 
 {
     Graph_vertices vertices;
     Graph_edges edges_from; /* mapping vertex A and all edges A --> ?? */
     Graph_edges edges_to;   /* mapping vertex A and all edges ?? --> A */
+
+    base_graph() {}
+    base_graph(vector<Vertex_ptr>& vv);
+    base_graph(vector<Edge_ptr>& ve);
+    base_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve);
 
     void vertices_insert(Vertex_ptr v) { vertices.insert(v); }
     void vertices_erase(Vertex_ptr v) { vertices.erase(v); }
@@ -256,5 +261,47 @@ struct base_graph
         return s;
     }
 };
+
+base_graph::base_graph(vector<Vertex_ptr>& vv) 
+{
+    for (auto v : vv) {
+        if (v)
+            vertices_insert(v);
+    }
+}
+base_graph::base_graph(vector<Edge_ptr>& ve)
+{
+    for (auto e : ve) {
+        if (e) {
+            auto f = e->from();
+            auto t = e->to();
+            if (f && t) {
+                edges_from_insert(f, e);
+                edges_to_insert(t, e);
+                vertices_insert(f);
+                vertices_insert(t);
+            }
+        }
+    }
+}
+base_graph::base_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve)
+{
+    for (auto e : ve) {
+        if (e) {
+            auto f = e->from();
+            auto t = e->to();
+            if (f && t) {
+                edges_from_insert(f, e);
+                edges_to_insert(t, e);
+                vertices_insert(f);
+                vertices_insert(t);
+            }
+        }
+    }
+    for (auto v : vv) {
+        if (v)
+            vertices_insert(v);
+    }
+}
 
 #endif

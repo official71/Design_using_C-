@@ -2,7 +2,9 @@
 #define _GRAPHOP_H
 
 #include <iostream>
-#include "graph.h"
+#include "dg.h"
+#include "dag.h"
+#include "dt.h"
 
 using namespace std;
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include "concepts.h"
-#include "graph.h"
+#include "dg.h"
+#include "dag.h"
+#include "dt.h"
 #include "graphop.h"
 
 using namespace std;
@@ -11,26 +13,7 @@ using namespace std;
 //     cout << gv.to_string() << endl;
 // }
 
-void try_copy(directed_graph& dg, Vertex_ptr vp1)
-{
-    directed_graph copy_dg(dg.base());
-    _DEBUG("COPY: ", copy_dg.to_string());
-
-    // remove_edge(dg, ep21);
-    // clear_edges_of(dg, vp1);
-    remove(copy_dg, vp1);
-    _DEBUG("Step 2: ", dg.to_string());
-
-    // remove_edge(dg, vp3, vp2);
-    // _DEBUG("Step 3: ", dg.to_string());
-
-    _DEBUG("COPY Step 2: ", copy_dg.to_string());
-
-    dg.copy_base(copy_dg.base());
-    _DEBUG("Step 2.5: ", dg.to_string());
-}
-
-void try_dfs()
+void construct_graph_1(directed_graph& dg)
 {
     Vertex_ptr a(new vertex(make_pair("a", 1)));
     Vertex_ptr b(new vertex(make_pair("b", 2)));
@@ -42,7 +25,6 @@ void try_dfs()
     Vertex_ptr h(new vertex(make_pair("h", 8)));
     Vertex_ptr i(new vertex(make_pair("i", 9)));
 
-    directed_graph dg;
     add(dg, a);
     add(dg, b);
     add(dg, c);
@@ -65,6 +47,70 @@ void try_dfs()
     auto ig = add_edge(dg, i, g, 900);
     /* cyclic now */
     auto eb = add_edge(dg, e, b, 1000);
+}
+
+vector<Vertex_ptr> init_vector_of_vertices_1()
+{
+    vector<Vertex_ptr> vv {};
+    
+    int i = 1;
+    char c = 'a';
+    for (; i < 10; ++i, ++c)
+        vv.push_back(make_shared<vertex>(vertex(make_pair(string(1, c), i))));
+    return vv;
+}
+
+vector<Edge_ptr> init_vector_of_edges_1(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[1], 100)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[1], vv[2], 200)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[3], 300)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[4], 400)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[1], vv[5], 500)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[5], vv[6], 600)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[6], vv[7], 700)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[5], vv[8], 800)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[8], vv[6], 900)));
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
+
+    return ve;
+}
+
+void try_new_graph()
+{
+    auto vv = init_vector_of_vertices_1();
+    auto ve = init_vector_of_edges_1(vv);
+
+    directed_graph dg(vv, ve);
+
+    _DEBUG("Graph: ", dg.to_string());
+}
+
+void try_copy(directed_graph& dg, Vertex_ptr vp1)
+{
+    directed_graph copy_dg(dg.base());
+    _DEBUG("COPY: ", copy_dg.to_string());
+
+    // remove_edge(dg, ep21);
+    // clear_edges_of(dg, vp1);
+    remove(copy_dg, vp1);
+    _DEBUG("Step 2: ", dg.to_string());
+
+    // remove_edge(dg, vp3, vp2);
+    // _DEBUG("Step 3: ", dg.to_string());
+
+    _DEBUG("COPY Step 2: ", copy_dg.to_string());
+
+    dg.copy_base(copy_dg.base());
+    _DEBUG("Step 2.5: ", dg.to_string());
+}
+
+void try_dfs()
+{
+    directed_graph dg;
+    construct_graph_1(dg);
 
     _DEBUG("Graph bg: ", dg.to_string());
 
@@ -107,7 +153,8 @@ void try_dfs()
 
 int main(int argc, char* argv[])
 {
-    try_dfs();
+    // try_dfs();
+    try_new_graph();
 #if 0
     // vertex bv;
     // cout << fun(bv) << endl;
