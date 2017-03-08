@@ -40,6 +40,9 @@ struct directed_acyclic_graph
     Edge_ptr edges_to_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_to_find(f, t); }
     Edge_ptr edges_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_from_find(f, t); }
 
+    Graph_vertices edges_from_neighbors(Vertex_ptr f) { return bg.edges_from_neighbors(f); }
+    Graph_vertices edges_to_neighbors(Vertex_ptr t) { return bg.edges_to_neighbors(t); }
+
     void edges_from_erase(Vertex_ptr f, Edge_ptr e) { bg.edges_from_erase(f, e); }
     void edges_to_erase(Vertex_ptr t, Edge_ptr e) { bg.edges_to_erase(t, e); }
     void edges_erase(Vertex_ptr f, Vertex_ptr t) { bg.edges_from_to_erase(f, t); }

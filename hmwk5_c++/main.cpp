@@ -15,11 +15,11 @@ using namespace std;
 
 void construct_graph_1(directed_graph& dg)
 {
-    Vertex_ptr a(new vertex(make_pair("a", 1)));
     Vertex_ptr b(new vertex(make_pair("b", 2)));
     Vertex_ptr c(new vertex(make_pair("c", 3)));
     Vertex_ptr d(new vertex(make_pair("d", 4)));
     Vertex_ptr e(new vertex(make_pair("e", 5)));
+    Vertex_ptr a(new vertex(make_pair("a", 1)));
     Vertex_ptr f(new vertex(make_pair("f", 6)));
     Vertex_ptr g(new vertex(make_pair("g", 7)));
     Vertex_ptr h(new vertex(make_pair("h", 8)));
@@ -46,7 +46,7 @@ void construct_graph_1(directed_graph& dg)
     /* this looks like a cycle but is not */
     auto ig = add_edge(dg, i, g, 900);
     /* cyclic now */
-    auto eb = add_edge(dg, e, b, 1000);
+    // auto eb = add_edge(dg, e, b, 1000);
 }
 
 vector<Vertex_ptr> init_vector_of_vertices_1()
@@ -101,6 +101,15 @@ void try_new_graph()
     add_edge(dag, make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
     _DEBUG("dag STEP 2: ", dag.to_string());
     _DEBUG("dag is cyclic: ", dag.is_cyclic());
+
+    /* try removing a key vertex */
+    remove(dg, vv[1]);
+    _DEBUG("dg STEP 3: ", dg.to_string());
+    _DEBUG("dg is cyclic: ", dg.is_cyclic());
+
+    remove(dag, vv[1]);
+    _DEBUG("dag STEP 3: ", dag.to_string());
+    _DEBUG("dag is cyclic: ", dag.is_cyclic());
 }
 
 void try_copy(directed_graph& dg, Vertex_ptr vp1)
@@ -132,6 +141,8 @@ void try_dfs()
     depth_first_search DFS(dg.base());
     _DEBUG("DFS created... try cyclic: ", DFS.is_cyclic());
 
+    // auto start = dg.base().vertices_find_by_value(make_pair("a",1));
+    // DFS.dfs(false, start);
     DFS.dfs();
     _DEBUG("Retry cyclic: ", DFS.is_cyclic());
 
@@ -164,12 +175,18 @@ void try_dfs()
         _DEBUG("parent of ", pp.first->to_string(), ": ", str);
     }
 
+    auto top = DFS.get_top_vertex();
+    _DEBUG("top vertex: ", top ? top->to_string() : "NULL");
+
+    _DEBUG("reachable from top vertex: ", DFS.reachable_from_top());
+    _DEBUG("reachable from arbitrary vertex: ", \
+        DFS.reachable_from_vertex(dg.base().vertices_find_by_value(make_pair("b",2))));
 }
 
 int main(int argc, char* argv[])
 {
-    // try_dfs();
-    try_new_graph();
+    try_dfs();
+    // try_new_graph();
 #if 0
     // vertex bv;
     // cout << fun(bv) << endl;

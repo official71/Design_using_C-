@@ -36,15 +36,17 @@ typedef pair<string,int> Val;
 
 
 
-
-
-
 struct vertex 
 {
     Val val;
     
     vertex(void) { val = make_pair("NULL", -1); }
     vertex(Val v) { val = v; }
+
+    bool operator< (const vertex& rhs) const
+    {
+        return val.second < rhs.val.second;
+    }
 
     Val value(void) { return val; }
     void set_value(Val v) { val = v; }
@@ -78,6 +80,11 @@ struct directed_edge
         v_from = from;
         v_to = to;
         val = v;
+    }
+
+    bool operator< (const vertex& rhs) const
+    {
+        return val.second < rhs.val.second;
     }
 
     bool contain(Vertex_ptr vp) { return v_from == vp || v_to == vp; }
@@ -115,7 +122,6 @@ inline bool operator< (const Edge_ptr lep, const Edge_ptr rep)
 {
     return get<1>(lep->value()) < get<1>(rep->value());
 }
-
 
 
 class depth_first_search;
@@ -164,6 +170,26 @@ struct base_graph
                 }
             }
         }
+    }
+
+    Vertex_ptr vertices_find_by_value(Val val)
+    {
+        for (auto p : vertices) {
+            if (val == p->value()) 
+                return p;
+        }
+        return NULL;
+    }
+
+    Edge_ptr edges_find_by_value(Val val)
+    {
+        for (auto p : edges_from) {
+            for (auto q : p.second) {
+                if (val == q->value()) 
+                    return q;
+            }
+        }
+        return NULL;
     }
 
     Edge_ptr edges_from_find(Vertex_ptr f, Vertex_ptr t)
