@@ -20,83 +20,69 @@ bool adjacent(DG dg, Vertex_ptr x, Vertex_ptr y)
 }
 
 /* add vertex */
-void add(DG & dg, Vertex_ptr x)
+Retval add(DG & dg, Vertex_ptr x)
 {
     if (!x) {
         _DEBUG("NULL Vertex_ptr.");
-        return;
+        return Failure;
     }
 
     dg.vertices_insert(x);
+    return Success;
 }
 
 /* add edge */
-void add_edge(DG & dg, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
+Retval add_edge(DG & dg, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
 {
+    _DEBUG("DG version...");
+
     if (!from || !to || !e) {
         _DEBUG("NULL vertices or edge ptr.");
-        return;
+        return Failure;
     }
     if (!e->is_from(from) || !e->is_to(to)) {
         _DEBUG("Input edge does not match input vertices.");
-        return;
+        return Failure;
     }
 
     dg.edges_from_insert(from, e);
     dg.edges_to_insert(to, e);
 
-    // /* add the edge to graph.edges (both from and to sets) */
-    // Graph_edges& ge_from = dg.edges_from();
-    // Graph_edges& ge_to = dg.edges_to();
-
-    // auto search = ge_from.find(x);
-    // if (search == ge_from.end()) {
-    //     _DEBUG("First from_edge for vertex: ", x->to_string());
-    //     ge_from.insert(make_pair(x, Set_edges{e}));
-    // } else {
-    //     search->second.insert(e);
-    // }
-
-    // search = ge_to.find(y);
-    // if (search == ge_to.end()) {
-    //     _DEBUG("First to_edge for vertex: ", y->to_string());
-    //     ge_to.insert(make_pair(y, Set_edges{e}));
-    // } else {
-    //     search->second.insert(e);
-    // }
-
     /* add the vertices to graph.vertices if not exist */
     add(dg, from);
     add(dg, to);
+
+    return Success;
 }
 
-void add_edge(DG & dg, Edge_ptr e)
+Retval add_edge(DG & dg, Edge_ptr e)
 {
     if (!e) {
         _DEBUG("NULL Edge_ptr.");
-        return;
+        return Failure;
     }
 
     Vertex_ptr v_from = e->from();
     Vertex_ptr v_to = e->to();
     if (!v_from || !v_to) {
         _DEBUG("NULL vertices.");
-        return;
+        return Failure;
     }
 
-    add_edge(dg, e, v_from, v_to);
+    return add_edge(dg, e, v_from, v_to);
 }
 
 template<typename T>
-Edge_ptr add_edge(DG & dg, Vertex_ptr x, Vertex_ptr y, T val)
+Edge_ptr add_edge(DG & dg, Vertex_ptr from, Vertex_ptr to, T val)
 {
-    if (!x || !y) {
+    if (!from || !to) {
         _DEBUG("NULL vertices.");
         return NULL;
     }
 
-    Edge_ptr e(new directed_edge(x, y, val));
-    add_edge(dg, e, x, y);
+    Edge_ptr e(new directed_edge(from, to, val));
+    if (add_edge(dg, e, from, to) == Failure)
+        return NULL;
     return e;
 }
 
@@ -109,46 +95,12 @@ Edge_ptr find_edge(DG & dg, Vertex_ptr from, Vertex_ptr to)
     }
 
     Edge_ptr ptr = dg.edges_from_find(from, to);
-
-    // Edge_ptr ptr = NULL;
-
-    // Graph_edges& ge_from = dg.edges_from();
-    // auto search_from = ge_from.find(x);
-    // if (search_from == ge_from.end()) {
-    //     _DEBUG("Graph does not contain vertex: ", x->to_string());
-    //     return NULL;
-    // } else {
-    //     Set_edges& se = search_from->second;
-    //     for (auto p : se) {
-    //         if (p->to() == y) {
-    //             ptr = p;
-    //             break;
-    //         }
-    //     }
-    // }
-
     if (ptr)
         return ptr;
 
     _DEBUG("There is nothing found in the from set, try the to set.");
 
     ptr = dg.edges_to_find(from, to);
-
-    // Graph_edges& ge_to = dg.edges_to();
-    // auto search_to = ge_to.find(y);
-    // if (search_to == ge_to.end()) {
-    //     _DEBUG("Graph does not contain vertex: ", y->to_string());
-    //     return NULL;
-    // } else {
-    //     Set_edges& se = search_to->second;
-    //     for (auto p : se) {
-    //         if (p->from() == x) {
-    //             ptr = p;
-    //             break;
-    //         }
-    //     }
-    // }
-
     if (ptr)
         _DEBUG("ABNORMAL ACTIVITY: edge only exists in the edges_to set.");
     return ptr;
@@ -158,35 +110,21 @@ Edge_ptr find_edge(DG & dg, Vertex_ptr from, Vertex_ptr to)
 Graph_vertices neighbors_from(DG dg, Vertex_ptr from)
 {
     Graph_vertices rv {};
-
-    Graph_edges& ge = dg.edges_from();
-    auto search = ge.find(from);
-    if (search == ge.end()) {
-        _DEBUG("Graph does not contain edges from vertex: ", from->to_string());
+    if (!from) {
+        _DEBUG("NULL vertices.");
         return rv;
     }
-
-    Set_edges& se = search->second;
-    for (auto e : se)
-        rv.insert(e->to());
-    return rv;
+    return dg.edges_from_neighbors(from);
 }
 
 Graph_vertices neighbors_to(DG dg, Vertex_ptr to)
 {
     Graph_vertices rv {};
-
-    Graph_edges& ge = dg.edges_to();
-    auto search = ge.find(to);
-    if (search == ge.end()) {
-        _DEBUG("Graph does not contain edges to vertex: ", to->to_string());
+    if (!to) {
+        _DEBUG("NULL vertices.");
         return rv;
     }
-
-    Set_edges& se = search->second;
-    for (auto e : se)
-        rv.insert(e->from());
-    return rv;
+    return dg.edges_to_neighbors(to);
 }
 
 Graph_vertices neighbors(DG dg, Vertex_ptr x)
@@ -220,30 +158,6 @@ Edge_ptr remove_edge(DG & dg, Vertex_ptr from, Vertex_ptr to, Edge_ptr e = NULL)
 
     dg.edges_from_erase(from, e);
     dg.edges_to_erase(to, e);
-
-    // /* remove the edge from graph.edges (both from and to sets) */
-    // Graph_edges& ge_from = dg.edges_from();
-    // Graph_edges& ge_to = dg.edges_to();
-
-    // auto search_from = ge_from.find(x);
-    // if (search_from == ge_from.end()) {
-    //     _DEBUG("Graph does not contain vertex: ", x->to_string());
-    // } else {
-    //     Set_edges& se = search_from->second;
-    //     auto search = se.find(e);
-    //     if (search != se.end())
-    //         se.erase(search);
-    // }
-
-    // auto search_to = ge_to.find(y);
-    // if (search_to == ge_to.end()) {
-    //     _DEBUG("Graph does not contain vertex: ", y->to_string());
-    // } else {
-    //     Set_edges& se = search_to->second;
-    //     auto search = se.find(e);
-    //     if (search != se.end())
-    //         se.erase(search);
-    // }
 
     return e;
 }
@@ -311,18 +225,42 @@ void remove(DG & dg, Vertex_ptr x)
  *
  * END:   Operations for General Directed Graph
  *
+ *-------------------------------------------------------------------
+ *
+ * BEGIN: Operations for Directed Acyclic Graph
+ *        (All operations that changes the underlying graph must be
+ *         validated against cycles)
+ *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-void add(DAG & dag, Vertex_ptr x)
+Retval add_edge(DAG & dag, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
 {
-    _DEBUG("DAG VERSION");
-    if (!x) {
-        _DEBUG("NULL Vertex_ptr.");
-        return;
+    _DEBUG("DAG version...");
+
+    if (!from || !to || !e) {
+        _DEBUG("NULL vertices or edge ptr.");
+        return Failure;
+    }
+    if (!e->is_from(from) || !e->is_to(to)) {
+        _DEBUG("Input edge does not match input vertices.");
+        return Failure;
     }
 
-    dag.vertices_insert(x);
+    /* construct a temporary graph to check cyclicity */
+    directed_acyclic_graph tmp_dag(dag.base());
+    tmp_dag.edges_from_insert(from, e);
+    tmp_dag.edges_to_insert(to, e);
+    tmp_dag.vertices_insert(from);
+    tmp_dag.vertices_insert(to);
+
+    if (tmp_dag.is_cyclic()) {
+        _DEBUG("ERROR: edge ", e->to_string(), " causes cycle to DAG.");
+        return Failure;
+    }
+
+    dag.copy_base(tmp_dag.base(), true);
+    return Success;
 }
 
 #endif

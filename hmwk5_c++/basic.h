@@ -7,6 +7,8 @@
 using namespace std;
 
 
+enum Retval {Success, Failure};
+
 
 #ifdef DEBUG
 void _log() {}
@@ -148,6 +150,21 @@ struct base_graph
         else
             search->second.insert(e);
     }
+    void edges_vector_insert(vector<Edge_ptr>& ve)
+    {
+        for (auto e : ve) {
+            if (e) {
+                auto f = e->from();
+                auto t = e->to();
+                if (f && t) {
+                    edges_from_insert(f, e);
+                    edges_to_insert(t, e);
+                    vertices_insert(f);
+                    vertices_insert(t);
+                }
+            }
+        }
+    }
 
     Edge_ptr edges_from_find(Vertex_ptr f, Vertex_ptr t)
     {
@@ -182,7 +199,7 @@ struct base_graph
         return ptr;
     }
 
-    Graph_vertices edge_from_neighbors(Vertex_ptr f)
+    Graph_vertices edges_from_neighbors(Vertex_ptr f)
     {
         Graph_vertices rv {};
 
@@ -195,7 +212,7 @@ struct base_graph
         return rv;
     }
 
-    Graph_vertices edge_to_neighbors(Vertex_ptr t)
+    Graph_vertices edges_to_neighbors(Vertex_ptr t)
     {
         Graph_vertices rv {};
 
@@ -207,8 +224,6 @@ struct base_graph
             rv.insert(e->from());
         return rv;
     }
-
-    //TODO: neighbors here!
 
     void edges_from_erase(Vertex_ptr f, Edge_ptr e)
     {

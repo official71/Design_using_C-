@@ -73,7 +73,7 @@ vector<Edge_ptr> init_vector_of_edges_1(vector<Vertex_ptr>& vv)
     ve.push_back(make_shared<directed_edge>(directed_edge(vv[6], vv[7], 700)));
     ve.push_back(make_shared<directed_edge>(directed_edge(vv[5], vv[8], 800)));
     ve.push_back(make_shared<directed_edge>(directed_edge(vv[8], vv[6], 900)));
-    ve.push_back(make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
+    // ve.push_back(make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
 
     return ve;
 }
@@ -84,8 +84,23 @@ void try_new_graph()
     auto ve = init_vector_of_edges_1(vv);
 
     directed_graph dg(vv, ve);
+    // add_edge(dg, ve[0]);
+    _DEBUG("dg: ", dg.to_string());
+    _DEBUG("dg is cyclic: ", dg.is_cyclic());
 
-    _DEBUG("Graph: ", dg.to_string());
+    directed_acyclic_graph dag(vv, ve);
+    // add_edge(dag, ve[0]);
+    _DEBUG("dag: ", dag.to_string());
+    _DEBUG("dag is cyclic: ", dag.is_cyclic());
+
+    /* try adding a cyclic edge */
+    add_edge(dg, make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
+    _DEBUG("dg STEP 2: ", dg.to_string());
+    _DEBUG("dg is cyclic: ", dg.is_cyclic());
+
+    add_edge(dag, make_shared<directed_edge>(directed_edge(vv[4], vv[1], 1000)));
+    _DEBUG("dag STEP 2: ", dag.to_string());
+    _DEBUG("dag is cyclic: ", dag.is_cyclic());
 }
 
 void try_copy(directed_graph& dg, Vertex_ptr vp1)

@@ -18,15 +18,12 @@ struct directed_acyclic_graph
     base_graph bg;
 
     directed_acyclic_graph() {}
-    directed_acyclic_graph(base_graph& base): bg(base)
-    {
-        _DEBUG("<directed_acyclic_graph> constructor using base_graph&");
-    }
+    directed_acyclic_graph(base_graph& base): bg(base) {}
+    directed_acyclic_graph(vector<Vertex_ptr>& vv);
+    directed_acyclic_graph(vector<Edge_ptr>& ve);
+    directed_acyclic_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve);
 
-    void copy_base(base_graph& base)
-    {
-        bg = base;
-    }
+    void copy_base(base_graph& base, bool trusted=false);
 
     base_graph& base() { return bg; }
     Graph_vertices& vertices() { return bg.vertices; }
@@ -47,6 +44,12 @@ struct directed_acyclic_graph
     void edges_to_erase(Vertex_ptr t, Edge_ptr e) { bg.edges_to_erase(t, e); }
     void edges_erase(Vertex_ptr f, Vertex_ptr t) { bg.edges_from_to_erase(f, t); }
 
+    bool is_cyclic()
+    {
+        depth_first_search DFS(bg);
+        return DFS.dfs(true);
+    }
+
     /* what makes it special */
     Graph_vertices topological_order() { return Graph_vertices{}; } 
 
@@ -57,5 +60,46 @@ struct directed_acyclic_graph
          "\nEDGES:\n" + bg.edges_to_string(edges_from());
     }
 };
+
+directed_acyclic_graph::directed_acyclic_graph(vector<Vertex_ptr>& vv)
+{
+    /* no need to check cyclic since there is no edges */
+    bg = base_graph(vv);
+}
+
+directed_acyclic_graph::directed_acyclic_graph(vector<Edge_ptr>& ve)
+{
+    base_graph tmp_bg = base_graph(ve);
+    depth_first_search DFS(tmp_bg);
+    if (!DFS.dfs(true))
+        copy_base(tmp_bg, true);
+    else
+        _DEBUG("ERROR: DAG not constructed due to cyclic input.");
+}
+
+directed_acyclic_graph::directed_acyclic_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve)
+{
+    base_graph tmp_bg = base_graph(vv);
+    tmp_bg.edges_vector_insert(ve);
+    depth_first_search DFS(tmp_bg);
+    if (!DFS.dfs(true))
+        copy_base(tmp_bg, true);
+    else
+        _DEBUG("ERROR: DAG not constructed due to cyclic input.");
+}
+
+void directed_acyclic_graph::copy_base(base_graph& base, bool trusted)
+{
+    bool cyclic = false;
+    if (!trusted) {
+        depth_first_search DFS(base);
+        cyclic = DFS.dfs(true);
+    }
+    if (!cyclic)
+        bg = base;
+    else
+        _DEBUG("ERROR: DAG not updated due to cyclic input.");
+}
+
 
 #endif

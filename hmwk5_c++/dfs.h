@@ -115,7 +115,7 @@ void depth_first_search::dfs_iter(Vertex_ptr u)
     colors[u] = Gray; /* discovered, in stack */
     orders[u].first = ++time; /* set discovery time */
 
-    for (auto v : bg.edge_from_neighbors(u)) {
+    for (auto v : bg.edges_from_neighbors(u)) {
         if (marked[v]) {
             if (colors[v] == Gray) {
                 /* Cycle detected */
