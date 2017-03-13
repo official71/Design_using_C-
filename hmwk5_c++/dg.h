@@ -30,6 +30,9 @@ struct directed_graph
     Graph_edges& edges_from() { return bg.edges_from; }
     Graph_edges& edges_to() { return bg.edges_to; }
 
+    bool has_vertex(Vertex_ptr v) { return bg.vertex_in_graph(v); }
+    bool has_edge(Edge_ptr e) { return bg.edge_in_graph(e); }
+
     void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
     void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }
 

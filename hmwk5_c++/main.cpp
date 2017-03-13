@@ -78,6 +78,97 @@ vector<Edge_ptr> init_vector_of_edges_1(vector<Vertex_ptr>& vv)
     return ve;
 }
 
+vector<Edge_ptr> init_vector_of_edges_2(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[1], 100))); //a->b
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[2], 200))); //a->c
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[3], 300))); //c->d
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[4], 400))); //d->e
+    return ve;
+}
+
+vector<Edge_ptr> init_vector_of_edges_3(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[1], 100))); //d->b
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[2], 200))); //d->c
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[0], 300))); //c->a
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[4], 400))); //a->e
+    return ve;
+}
+
+vector<Edge_ptr> init_vector_of_edges_4(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[1], 100))); //a->b
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[2], 200))); //a->c
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[3], 300))); //c->d
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[4], 400))); //d->e
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[1], vv[3], 500))); //b->d
+    return ve;
+}
+
+vector<Edge_ptr> init_vector_of_edges_5(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[1], 100))); //a->b
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[2], 200))); //a->c
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[4], 400))); //d->e
+    return ve;
+}
+
+vector<Edge_ptr> init_vector_of_edges_6(vector<Vertex_ptr>& vv)
+{
+    vector<Edge_ptr> ve {};
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[1], 100))); //a->b
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[0], vv[2], 200))); //a->c
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[2], vv[3], 300))); //c->d
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[3], vv[4], 400))); //d->e
+    ve.push_back(make_shared<directed_edge>(directed_edge(vv[4], vv[0], 500))); //e->a
+    return ve;
+}
+
+void try_dt()
+{
+    auto vv = init_vector_of_vertices_1();
+
+    auto ve1 = init_vector_of_edges_2(vv);
+    directed_tree dt1(ve1, vv[0]);
+    _DEBUG("------------dt #1: ", dt1.to_string());
+
+    add(dt1, vv[5]);
+    _DEBUG("------------dt STEP 1: ", dt1.to_string());
+
+    /* add edge c->f */
+    add_edge(dt1, make_shared<directed_edge>(directed_edge(vv[2], vv[5], 1000)));
+    _DEBUG("------------dt STEP 2: ", dt1.to_string());
+
+    /* add edge e->f */
+    add_edge(dt1, make_shared<directed_edge>(directed_edge(vv[4], vv[5], 2000)));
+    _DEBUG("------------dt STEP 3: ", dt1.to_string());
+
+    /* add edge g->h */
+    add_edge(dt1, make_shared<directed_edge>(directed_edge(vv[6], vv[7], 1000)));
+    _DEBUG("------------dt STEP 4: ", dt1.to_string());
+
+    // auto ve2 = init_vector_of_edges_3(vv);
+    // directed_tree dt2(ve2, vv[3]);
+    // _DEBUG("------------dt #2: ", dt2.to_string());
+
+    // auto ve3 = init_vector_of_edges_4(vv);
+    // directed_tree dt3(ve3, vv[0]);
+    // _DEBUG("------------dt #3: ", dt3.to_string());
+
+    // auto ve4 = init_vector_of_edges_5(vv);
+    // directed_tree dt4(ve4, vv[0]);
+    // _DEBUG("------------dt #4: ", dt4.to_string());
+
+    // auto ve5 = init_vector_of_edges_6(vv);
+    // directed_tree dt5(ve5, vv[0]);
+    // _DEBUG("------------dt #5: ", dt5.to_string());
+}
+
 void try_new_graph()
 {
     auto vv = init_vector_of_vertices_1();
@@ -185,8 +276,9 @@ void try_dfs()
 
 int main(int argc, char* argv[])
 {
-    try_dfs();
+    // try_dfs();
     // try_new_graph();
+    try_dt();
 #if 0
     // vertex bv;
     // cout << fun(bv) << endl;

@@ -18,6 +18,7 @@ struct directed_acyclic_graph
     base_graph bg;
 
     directed_acyclic_graph() {}
+    //TODO: check dag after this
     directed_acyclic_graph(base_graph& base): bg(base) {}
     directed_acyclic_graph(vector<Vertex_ptr>& vv);
     directed_acyclic_graph(vector<Edge_ptr>& ve);
@@ -29,6 +30,9 @@ struct directed_acyclic_graph
     Graph_vertices& vertices() { return bg.vertices; }
     Graph_edges& edges_from() { return bg.edges_from; }
     Graph_edges& edges_to() { return bg.edges_to; }
+
+    bool has_vertex(Vertex_ptr v) { return bg.vertex_in_graph(v); }
+    bool has_edge(Edge_ptr e) { return bg.edge_in_graph(e); }
 
     void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
     void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }
@@ -47,6 +51,7 @@ struct directed_acyclic_graph
     void edges_to_erase(Vertex_ptr t, Edge_ptr e) { bg.edges_to_erase(t, e); }
     void edges_erase(Vertex_ptr f, Vertex_ptr t) { bg.edges_from_to_erase(f, t); }
 
+    /* what makes it special */
     bool is_cyclic()
     {
         depth_first_search DFS(bg);

@@ -263,4 +263,59 @@ Retval add_edge(DAG & dag, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
     return Success;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ * END:   Operations for Directed Acyclic Graph
+ *
+ *-------------------------------------------------------------------
+ *
+ * BEGIN: Operations for Directed Tree
+ *        1. Adding a single vertex/node is not allowed (DT must be connected)
+ *        2. Adding a single edge is allowed iff the edge connnects an existing 
+ *           node and a new leaf node
+ *        3. Removing a single edge is not allowed
+ *        4. Removing a single node is allowed iff it is a leaf node, and the 
+ *           edge that links to it will be removed too
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+Retval add(DT & dt, Vertex_ptr x)
+{
+    _DEBUG("DT does not allow adding a node without an edge from its parent.");
+    return Failure;
+}
+
+Retval add_edge(DT & dt, Edge_ptr e, Vertex_ptr from, Vertex_ptr to)
+{
+    _DEBUG("DG version...");
+
+    if (!from || !to || !e) {
+        _DEBUG("NULL vertices or edge ptr.");
+        return Failure;
+    }
+    if (!e->is_from(from) || !e->is_to(to)) {
+        _DEBUG("Input edge does not match input vertices.");
+        return Failure;
+    }
+
+    if (!dt.has_vertex(from)) {
+        _DEBUG("The vertex: ", from->to_string(), \
+            " does not exist in DT, no edges from it shall be added.");
+        return Failure;
+    }
+    if (dt.has_vertex(to)) {
+        _DEBUG("The vertex: ", to->to_string(), \
+            " already exists in DT, no edges to it shall be added.");
+        return Failure;
+    }
+
+    dt.edges_from_insert(from, e);
+    dt.edges_to_insert(to, e);
+    dt.vertices_insert(to);
+
+    return Success;
+}
+
+//TODO remove
+
 #endif

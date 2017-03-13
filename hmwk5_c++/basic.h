@@ -137,6 +137,19 @@ struct base_graph
     base_graph(vector<Edge_ptr>& ve);
     base_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve);
 
+    bool vertex_in_graph(Vertex_ptr x)
+    {
+        return vertices.find(x) != vertices.end();
+    }
+    bool edge_in_graph(Edge_ptr e)
+    {
+        auto f = e->from();
+        auto search = edges_from.find(f);
+        if (search == edges_from.end())
+            return false;
+        return search->second.find(e) != search->second.end();
+    }
+
     void vertices_insert(Vertex_ptr v) { vertices.insert(v); }
     void vertices_erase(Vertex_ptr v) { vertices.erase(v); }
 
