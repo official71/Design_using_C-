@@ -54,8 +54,8 @@ struct directed_acyclic_graph
     /* what makes it special */
     bool is_cyclic()
     {
-        depth_first_search DFS(bg);
-        return DFS.dfs(true);
+        depth_first_search DFS;
+        return DFS.dfs(bg, true);
     }
 
     /* what makes it special */
@@ -78,8 +78,8 @@ directed_acyclic_graph::directed_acyclic_graph(vector<Vertex_ptr>& vv)
 directed_acyclic_graph::directed_acyclic_graph(vector<Edge_ptr>& ve)
 {
     base_graph tmp_bg = base_graph(ve);
-    depth_first_search DFS(tmp_bg);
-    if (!DFS.dfs(true))
+    depth_first_search DFS;
+    if (!DFS.dfs(tmp_bg, true))
         copy_base(tmp_bg, true);
     else
         _DEBUG("ERROR: DAG not constructed due to cyclic input.");
@@ -89,8 +89,8 @@ directed_acyclic_graph::directed_acyclic_graph(vector<Vertex_ptr>& vv, vector<Ed
 {
     base_graph tmp_bg = base_graph(vv);
     tmp_bg.edges_vector_insert(ve);
-    depth_first_search DFS(tmp_bg);
-    if (!DFS.dfs(true))
+    depth_first_search DFS;
+    if (!DFS.dfs(tmp_bg, true))
         copy_base(tmp_bg, true);
     else
         _DEBUG("ERROR: DAG not constructed due to cyclic input.");
@@ -100,8 +100,8 @@ void directed_acyclic_graph::copy_base(base_graph& base, bool trusted)
 {
     bool cyclic = false;
     if (!trusted) {
-        depth_first_search DFS(base);
-        cyclic = DFS.dfs(true);
+        depth_first_search DFS;
+        cyclic = DFS.dfs(base, true);
     }
     if (!cyclic)
         bg = base;

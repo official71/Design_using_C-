@@ -229,12 +229,12 @@ void try_dfs()
 
     _DEBUG("Graph bg: ", dg.to_string());
 
-    depth_first_search DFS(dg.base());
+    depth_first_search DFS;
     _DEBUG("DFS created... try cyclic: ", DFS.is_cyclic());
 
     // auto start = dg.base().vertices_find_by_value(make_pair("a",1));
     // DFS.dfs(false, start);
-    DFS.dfs();
+    DFS.dfs(dg.base());
     _DEBUG("Retry cyclic: ", DFS.is_cyclic());
 
     // int num_cycles();
@@ -269,9 +269,9 @@ void try_dfs()
     auto top = DFS.get_top_vertex();
     _DEBUG("top vertex: ", top ? top->to_string() : "NULL");
 
-    _DEBUG("reachable from top vertex: ", DFS.reachable_from_top());
+    _DEBUG("reachable from top vertex: ", DFS.reachable_from_vertex(dg.base(), top));
     _DEBUG("reachable from arbitrary vertex: ", \
-        DFS.reachable_from_vertex(dg.base().vertices_find_by_value(make_pair("b",2))));
+        DFS.reachable_from_vertex(dg.base(), dg.base().vertices_find_by_value(make_pair("b",2))));
 }
 
 int main(int argc, char* argv[])

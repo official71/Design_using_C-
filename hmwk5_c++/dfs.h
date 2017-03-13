@@ -14,7 +14,7 @@ class depth_first_search
 {
 
 private:
-    base_graph bg; /* input graph directed */
+    // base_graph bg; /* input graph directed */
 
     /* outputs */
     map<Vertex_ptr, pair<int, int>> orders {}; /* <discovery, finish> time orders */
@@ -37,17 +37,20 @@ private:
     void save_top_vertex();
 
     /* iterating function */
-    void dfs_iter(Vertex_ptr vp);
+    void dfs_iter(base_graph& bg, Vertex_ptr vp);
 
     /* reconstruct cycle function */
     void record_cycle(Vertex_ptr u, Vertex_ptr v);
 
 public:
-    depth_first_search(base_graph& base);
+    // depth_first_search(base_graph& base);
+    depth_first_search() {}
     ~depth_first_search() {}
 
-    bool dfs(bool break_if_cyclic=false, Vertex_ptr start=NULL);
+    bool dfs(base_graph& bg, bool break_if_cyclic=false, Vertex_ptr start=NULL);
+    bool reachable_from_vertex(base_graph& bg, Vertex_ptr start);
     
+    /* following methods must be called after running dfs on the graph */
     bool is_cyclic();
     int num_cycles();
     map<int, vector<Vertex_ptr>> get_cycles();
@@ -55,11 +58,9 @@ public:
     map<Vertex_ptr, pair<int, int>> get_orders();
     map<Vertex_ptr, Vertex_ptr> get_parents();
     Vertex_ptr get_top_vertex();
-    bool reachable_from_vertex(Vertex_ptr start);
-    bool reachable_from_top();
 };
 
-depth_first_search::depth_first_search(base_graph& base) : bg(base) {}
+// depth_first_search::depth_first_search(base_graph& base) : bg(base) {}
 
 bool depth_first_search::is_cyclic()
 {
@@ -123,7 +124,7 @@ void depth_first_search::record_cycle(Vertex_ptr u, Vertex_ptr v)
     cycles[++nr_cycles] = vv;
 }
 
-void depth_first_search::dfs_iter(Vertex_ptr u)
+void depth_first_search::dfs_iter(base_graph& bg, Vertex_ptr u)
 {
     marked[u] = true;
     colors[u] = Gray; /* discovered, in stack */
@@ -141,7 +142,7 @@ void depth_first_search::dfs_iter(Vertex_ptr u)
         } else {
             /* v is not marked/discovered */
             parents[v] = u;
-            dfs_iter(v);
+            dfs_iter(bg, v);
             if (cyclic && cyclic_break_flag)
                 return;
         }
@@ -151,7 +152,7 @@ void depth_first_search::dfs_iter(Vertex_ptr u)
     orders[u].second = ++time; /* set finish time */
 }
 
-bool depth_first_search::dfs(bool break_if_cyclic, Vertex_ptr start)
+bool depth_first_search::dfs(base_graph& bg, bool break_if_cyclic, Vertex_ptr start)
 {
     time = 0; /* everything is valid now */
     cyclic_break_flag = break_if_cyclic;
@@ -166,7 +167,7 @@ bool depth_first_search::dfs(bool break_if_cyclic, Vertex_ptr start)
 
     if (start && bg.vertices.find(start) != bg.vertices.end()) {
         /* if the starting vertex is specified */
-        dfs_iter(start);
+        dfs_iter(bg, start);
         if (cyclic && cyclic_break_flag)
             return cyclic;
     }
@@ -174,7 +175,7 @@ bool depth_first_search::dfs(bool break_if_cyclic, Vertex_ptr start)
     for(auto vp : bg.vertices) {
         if (!marked[vp]) {
             /* dive into iterations */
-            dfs_iter(vp);
+            dfs_iter(bg, vp);
             if (cyclic && cyclic_break_flag)
                 break;
         }
@@ -202,7 +203,7 @@ void depth_first_search::save_top_vertex()
     }
 }
 
-bool depth_first_search::reachable_from_vertex(Vertex_ptr start)
+bool depth_first_search::reachable_from_vertex(base_graph& bg, Vertex_ptr start)
 {
     if (!start) {
         _DEBUG("NULL input vertex.");
@@ -214,20 +215,11 @@ bool depth_first_search::reachable_from_vertex(Vertex_ptr start)
     }
 
     /* run dfs from the given vertex */
-    _DEBUG("Re-run DFS from input vertex...");
-    dfs(false, start);
+    _DEBUG("Run DFS from input vertex...");
+    dfs(bg, false, start);
 
     /* check the finishing time of the given vertex */
     return max_finishing_time == orders[start].second;
-}
-
-bool depth_first_search::reachable_from_top()
-{
-    if (!top_vertex) {
-        _DEBUG("Attempt to access top vertex without running full dfs...");
-        return false;
-    }
-    return reachable_from_vertex(top_vertex);
 }
 
 #endif

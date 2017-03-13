@@ -104,8 +104,8 @@ bool is_directed_tree(base_graph& bg, Vertex_ptr root)
     }
 
     /* graph must be acyclic */
-    depth_first_search DFS(bg);
-    return !DFS.dfs(true, root);
+    depth_first_search DFS;
+    return !DFS.dfs(bg, true, root);
 }
 
 directed_tree::directed_tree(Vertex_ptr root)
