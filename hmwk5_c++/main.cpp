@@ -46,7 +46,7 @@ void construct_graph_1(directed_graph& dg)
     /* this looks like a cycle but is not */
     auto ig = add_edge(dg, i, g, 900);
     /* cyclic now */
-    // auto eb = add_edge(dg, e, b, 1000);
+    auto eb = add_edge(dg, e, b, 1000);
 }
 
 vector<Vertex_ptr> init_vector_of_vertices_1()
@@ -229,6 +229,9 @@ void try_dfs()
 
     _DEBUG("Graph bg: ", dg.to_string());
 
+    depth_first_search DFS1;
+    _DEBUG("DFS1 created... try cyclic: ", DFS1.is_cyclic(dg.base()));
+
     depth_first_search DFS;
     _DEBUG("DFS created... try cyclic: ", DFS.is_cyclic());
 
@@ -260,6 +263,12 @@ void try_dfs()
             std::to_string(op.second.second));
     }
 
+    _DEBUG("Vertices in order: ");
+    auto vertices_order = DFS.vertices_in_order();
+    for (auto vo : vertices_order) {
+        _DEBUG(vo->to_string());
+    }
+
     auto parents = DFS.get_parents();
     for (auto pp : parents) {
         string str = pp.second ? pp.second->to_string() : "NULL";
@@ -276,9 +285,9 @@ void try_dfs()
 
 int main(int argc, char* argv[])
 {
-    // try_dfs();
+    try_dfs();
     // try_new_graph();
-    try_dt();
+    // try_dt();
 #if 0
     // vertex bv;
     // cout << fun(bv) << endl;

@@ -53,7 +53,7 @@ struct directed_graph
     bool is_cyclic()
     {
         depth_first_search DFS;
-        return DFS.dfs(bg, true);
+        return DFS.is_cyclic(bg);
     }
 
     string to_string() 
