@@ -1,5 +1,5 @@
 #include <iostream>
-#include "concepts.h"
+// #include "concepts.h"
 #include "dg.h"
 #include "dag.h"
 #include "dt.h"
@@ -152,6 +152,14 @@ void try_dt()
     add_edge(dt1, make_shared<directed_edge>(directed_edge(vv[6], vv[7], 1000)));
     _DEBUG("------------dt STEP 4: ", dt1.to_string());
 
+    /* remove node d */
+    remove(dt1, vv[3]);
+    _DEBUG("------------dt STEP 5: ", dt1.to_string());
+
+    /* remove node e */
+    remove(dt1, vv[4]);
+    _DEBUG("------------dt STEP 6: ", dt1.to_string());
+
     // auto ve2 = init_vector_of_edges_3(vv);
     // directed_tree dt2(ve2, vv[3]);
     // _DEBUG("------------dt #2: ", dt2.to_string());
@@ -237,7 +245,7 @@ void try_dfs()
 
     // auto start = dg.base().vertices_find_by_value(make_pair("a",1));
     // DFS.dfs(false, start);
-    DFS.dfs(dg.base());
+    DFS.dfs(dg.base(), dg.base().vertices_find_by_value(make_pair("b",2)));
     _DEBUG("Retry cyclic: ", DFS.is_cyclic());
 
     // int num_cycles();
@@ -264,7 +272,7 @@ void try_dfs()
     }
 
     _DEBUG("Vertices in order: ");
-    auto vertices_order = DFS.vertices_in_order();
+    auto vertices_order = DFS.vertices_in_order(dg.base().vertices_find_by_value(make_pair("a",1)));
     for (auto vo : vertices_order) {
         _DEBUG(vo->to_string());
     }

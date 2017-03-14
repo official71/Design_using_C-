@@ -44,13 +44,15 @@ private:
     /* reconstruct cycle function */
     void record_cycle(Vertex_ptr u, Vertex_ptr v);
 
+    void init();
 
 public:
     // depth_first_search(base_graph& base);
     depth_first_search() {}
     ~depth_first_search() {}
 
-    vector<Vertex_ptr> dfs(base_graph& bg, Vertex_ptr start=NULL);
+    vector<Vertex_ptr> dfs(base_graph& bg, Vertex_ptr start);
+    vector<Vertex_ptr> dfs(base_graph& bg);
     bool reachable_from_vertex(base_graph& bg, Vertex_ptr start);
     bool is_cyclic(base_graph& bg);
     
@@ -59,13 +61,29 @@ public:
     int num_cycles();
     map<int, vector<Vertex_ptr>> get_cycles();
 
-    vector<Vertex_ptr> vertices_in_order();
+    vector<Vertex_ptr> vertices_in_order(Vertex_ptr start=NULL);
     map<Vertex_ptr, pair<int, int>> get_orders();
     map<Vertex_ptr, Vertex_ptr> get_parents();
     Vertex_ptr get_top_vertex();
 };
 
-// depth_first_search::depth_first_search(base_graph& base) : bg(base) {}
+
+void depth_first_search::init()
+{
+    time = -1;
+    max_finishing_time = -1;
+    cyclic_break_flag = false;
+
+    cyclic = false;
+    nr_cycles = 0;
+    cycles.clear();
+
+    top_vertex = NULL;
+    orders.clear();
+    parents.clear();
+    marked.clear();
+    colors.clear();
+}
 
 bool depth_first_search::is_cyclic()
 {
@@ -88,7 +106,7 @@ map<int, vector<Vertex_ptr>> depth_first_search::get_cycles()
     return cycles;
 }
 
-vector<Vertex_ptr> depth_first_search::vertices_in_order()
+vector<Vertex_ptr> depth_first_search::vertices_in_order(Vertex_ptr start)
 {
     vector<Vertex_ptr> vec;
     if (!is_valid()) {
@@ -96,9 +114,22 @@ vector<Vertex_ptr> depth_first_search::vertices_in_order()
         return vec;
     }
 
+    int beg = 1;
+    int end = max_finishing_time;
+    if (start) {
+        auto search = orders.find(start);
+        if (search != orders.end()) {
+            beg = search->second.first;
+            end = search->second.second;
+        }
+    }
+
     vector<pair<Vertex_ptr, int>> tmp;
-    for (auto p : orders)
-        tmp.push_back(make_pair(p.first, p.second.first));
+    for (auto p : orders) {
+        int t = p.second.first;
+        if (t >= beg && t <= end)
+            tmp.push_back(make_pair(p.first, t));
+    }
     sort(tmp.begin(), tmp.end(), 
         [](const pair<Vertex_ptr, int>& u, const pair<Vertex_ptr, int>& v) \
         {return u.second < v.second;});
@@ -134,7 +165,6 @@ Vertex_ptr depth_first_search::get_top_vertex()
  */
 void depth_first_search::record_cycle(Vertex_ptr u, Vertex_ptr v)
 {
-    // auto vv = cycles[++nr_cycles];
     vector<Vertex_ptr> vv {};
     vv.push_back(u);
 
@@ -179,16 +209,10 @@ void depth_first_search::dfs_iter(base_graph& bg, Vertex_ptr u)
 
 bool depth_first_search::run_dfs(base_graph& bg, bool break_if_cyclic, Vertex_ptr start)
 {
+    init();
+
     time = 0; /* everything is valid now */
     cyclic_break_flag = break_if_cyclic;
-
-    /* initialize */
-    for (auto vp : bg.vertices) {
-        marked[vp] = false;
-        parents[vp] = NULL;
-        colors[vp] = White;
-        orders[vp] = make_pair(0, 0);
-    }
 
     if (start && bg.vertices.find(start) != bg.vertices.end()) {
         /* if the starting vertex is specified */
@@ -215,7 +239,28 @@ bool depth_first_search::run_dfs(base_graph& bg, bool break_if_cyclic, Vertex_pt
 
 vector<Vertex_ptr> depth_first_search::dfs(base_graph& bg, Vertex_ptr start)
 {
+    if (start)
+        _DEBUG("Run dfs from specified vertex: ", start->to_string());
+    else
+        return dfs(bg);
+
     run_dfs(bg, false, start);
+    return vertices_in_order(start);
+}
+vector<Vertex_ptr> depth_first_search::dfs(base_graph& bg)
+{
+    _DEBUG("Run dfs from un-specified vertex.");
+    run_dfs(bg, false, NULL);
+    
+    if (!top_vertex) {
+        _DEBUG("Should not happen, NULL top vertex after full dfs.");
+        return vertices_in_order();
+    }
+
+    if (orders[top_vertex].first != 1) {
+        _DEBUG("Re-run dfs from the top vertex.");
+        run_dfs(bg, false, top_vertex);
+    }
     return vertices_in_order();
 }
 
