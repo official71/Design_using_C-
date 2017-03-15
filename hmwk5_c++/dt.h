@@ -7,7 +7,7 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "concepts.h"
+// #include "concepts.h"
 #include "basic.h"
 #include "dfs.h"
 
@@ -32,6 +32,11 @@ struct directed_tree
     bool has_vertex(Vertex_ptr v) { return bg.vertex_in_graph(v); }
     bool has_edge(Edge_ptr e) { return bg.edge_in_graph(e); }
 
+    Val value(Vertex_ptr v) { return bg.vertex_value(v); }
+    Val value(Edge_ptr e) { return bg.edge_value(e); }
+    void set_value(Vertex_ptr v, Val val) { bg.set_vertex_value(v, val); }
+    void set_value(Edge_ptr e, Val val) { bg.set_edge_value(e, val); }
+
     void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
     void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }
 
@@ -43,7 +48,10 @@ struct directed_tree
     Edge_ptr edges_find(Vertex_ptr f, Vertex_ptr t) { return bg.edges_from_find(f, t); }
 
     Graph_vertices edges_from_neighbors(Vertex_ptr f) { return bg.edges_from_neighbors(f); }
+    Graph_vertices children(Vertex_ptr f) { return bg.edges_from_neighbors(f); }
     Graph_vertices edges_to_neighbors(Vertex_ptr t) { return bg.edges_to_neighbors(t); }
+    Graph_vertices parent(Vertex_ptr t) { return bg.edges_to_neighbors(t); }
+    bool is_leaf(Vertex_ptr x) { return children(x).size() == 0; }
 
     void edges_from_erase(Vertex_ptr f, Edge_ptr e) { bg.edges_from_erase(f, e); }
     void edges_to_erase(Vertex_ptr t, Edge_ptr e) { bg.edges_to_erase(t, e); }
@@ -53,6 +61,8 @@ struct directed_tree
     Vertex_ptr root() { return root_node; }
     void set_root(Vertex_ptr vp) { root_node = vp; }
     bool has_root() { return root_node != NULL; }
+
+    vector<Vertex_ptr> topological_order();
 
     string to_string() 
     {
@@ -149,5 +159,12 @@ void directed_tree::copy_base(base_graph& base, Vertex_ptr root, bool trusted)
         bg = base;
     else
         _DEBUG("ERROR: DT not updated, input violates DT criteria.");
+}
+
+
+vector<Vertex_ptr> directed_tree::topological_order()
+{
+    depth_first_search DFS;
+    return DFS.dfs(bg);
 }
 #endif

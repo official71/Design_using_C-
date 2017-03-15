@@ -1,16 +1,10 @@
-#Makefile for graph library attempts
+CXX = g++
 
-PROG = run
-CC = g++
-CPPFLAGS = -std=c++1z -fconcepts -Wall -DDEBUG
-#CPPFLAGS = -std=c++1z -fconcepts -Wall 
-OBJS = main.o
+main : main.cpp
+	g++ -fconcepts -O2 -std=c++1z main.cpp -o main
 
-$(PROG) : $(OBJS)
-	$(CC) $(CPPFLAGS) -o $(PROG) $(OBJS)
-main.o :
-	$(CC) $(CPPFLAGS) -c main.cpp
-# graph.o :
-# 	$(CC) $(CPPFLAGS) -c graph.cpp
-clean:
-	rm -f core $(PROG) $(OBJS)
+debug : main.cpp
+	g++ -fconcepts -O0 -std=c++1z -g3 main.cpp -DDEBUG -o debug
+
+valgrind : debug
+	valgrind -v --num-callers=20 --leak-check=yes --leak-resolution=high --show-reachable=yes ./debug

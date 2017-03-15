@@ -1,0 +1,81 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper}                   		% ... or a4paper or a5paper or letterpaper 
+%\geometry{landscape}                		% Activate for rotated page geometry
+\usepackage[parfill]{parskip}    			% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or epsÂ§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{float}
+\usepackage{graphicx}
+\graphicspath{ {/Users/yiqi/Desktop/School/Courses/ComsW4995_Design_Using_C++/Homeworks/hmwk3_c++/graphs/} }
+
+
+%SetFonts
+
+\title{Homework 6: Graph Library}
+\author{Yi Qi, UNI: yq2211}
+\date{3/11/2017}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+
+\section*{Concepts}
+
+The key differences among general directed graph (DG), directed acyclic graph (DAG) and directed tree (DT) are:
+
+$\bullet$ DG consists of vertices and edges. DG can add, remove, assign values to and get values of vertices and edges.
+
+$\bullet$ DAG is a DG. Additionally, DAG must have no cycles, thus has a topological ordering of vertices.
+
+$\bullet$ DT is a DAG. Additionally, DT must have a root vertex/node that has no parent node, all other nodes must have exactly one parent. DT must be connected, i.e. there exists a path from root node to every node in DT.
+
+Three concepts are established to describe the differences above.
+
+\section*{Architecture}
+
+$\bullet$ \textbf{basic.h}\\
+Contains definitions of basic data structures and concepts, including:\\
+\-\hspace{.5cm} $\bullet$  \textit{struct vertex} for vertex,\\
+\-\hspace{.5cm} $\bullet$  \textit{struct directed\_edge} for edge,\\
+\-\hspace{.5cm} $\bullet$  \textit{struct base\_graph} for basic directed graph, represented as adjacent list, containing basic operation member functions,\\
+\-\hspace{.5cm} $\bullet$  \textit{concept bool DG, DAG, DT} for concepts.
+
+$\bullet$ \textbf{dg.h}\\
+For \textit{struct directed\_graph}, which has a member of \textit{struct base\_graph} and multiple member functions such as set\_value(), insert\_vertices() and to\_string(). The constructor takes various inputs.
+
+
+$\bullet$ \textbf{dag.h}\\
+For \textit{struct directed\_acyclic\_graph}, which also contains a member of \textit{struct base\_graph} and multiple member functions that all have same names as those of \textit{struct directed\_graph}. To meet the concept requirements, it has additional functions such as topological\_order() that \textit{struct directed\_graph} does not have. The constructor functions differ from those of \textit{struct directed\_graph} in that they check for cycles caused by input.
+
+$\bullet$ \textbf{dt.h}\\
+For \textit{struct directed\_tree}, which is similar with \textit{struct directed\_acyclic\_graph} but with member functions for root and more validation in constructors.
+
+$\bullet$ \textbf{graphop.h}\\
+Overloading operation functions on graphs based on concepts defined for DG, DAG and DT. For example, add\_edge(\textbf{DG}\&, Edge\_ptr) adds edge to a graph, while add\_edge(\textbf{DAG}\&, Edge\_ptr) only adds edge if it does not cause cycle, and add\_edge(\textbf{DT}\&, Edge\_ptr) requires the edge to not only not cause cycle, but also not violate the one-parent rule of trees.
+
+$\bullet$ \textbf{dfs.h}\\
+For \textit{class DFS} that runs Depth-first-search.
+
+For testing purposes,
+
+$\bullet$ \textbf{gmaker.h}\\
+Generates various vectors of vertices and edges to construct graphs.
+
+$\bullet$ \textbf{main.cpp}\\
+Contains main testing functions.
+
+\section*{Leaks}
+
+The \textit{Vertex\_ptr} and \textit{Edge\_ptr} are \textit{shared\_ptr} and put into STL containers so that they can be freed when there is no reference. There is no memory leakage detected in tests.
+
+\end{document}  
+
+
+
+
+
+

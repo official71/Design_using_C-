@@ -7,7 +7,6 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "concepts.h"
 #include "basic.h"
 #include "dfs.h"
 
@@ -32,6 +31,11 @@ struct directed_graph
 
     bool has_vertex(Vertex_ptr v) { return bg.vertex_in_graph(v); }
     bool has_edge(Edge_ptr e) { return bg.edge_in_graph(e); }
+
+    Val value(Vertex_ptr v) { return bg.vertex_value(v); }
+    Val value(Edge_ptr e) { return bg.edge_value(e); }
+    void set_value(Vertex_ptr v, Val val) { bg.set_vertex_value(v, val); }
+    void set_value(Edge_ptr e, Val val) { bg.set_edge_value(e, val); }
 
     void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
     void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }

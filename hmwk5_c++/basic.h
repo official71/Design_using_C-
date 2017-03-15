@@ -6,10 +6,10 @@
 
 using namespace std;
 
-
+/* function return value */
 enum Retval {Success, Failure};
 
-
+/* print debug messages if -DDEBUG specified */
 #ifdef DEBUG
 void _log() {}
 template<typename Head, typename ...Rest>
@@ -31,11 +31,13 @@ void _log(Head && h, Rest && ...r)
 #endif
 
 
-
+/* value type of vertex and edge */
 typedef pair<string,int> Val;
+const Val INVALID_VERTEX_VALUE = make_pair("INVALID_VERTEX_VALUE", -1);
+const Val INVALID_EDGE_VALUE = make_pair("INVALID_EDGE_VALUE", -1);
 
 
-
+/* Vertex */
 struct vertex 
 {
     Val val;
@@ -56,10 +58,10 @@ struct vertex
         return "[(" + get<0>(val) + ")::(" + std::to_string(get<1>(val)) + ")]";
     }
 };
-
 typedef shared_ptr<vertex> Vertex_ptr;
 
 
+/* Edge */
 struct directed_edge 
 {
     Val val;
@@ -102,17 +104,13 @@ struct directed_edge
         return "{(" + get<0>(val) + ")::(" + std::to_string(get<1>(val)) + ")}";
     }
 };
-
-
-
 typedef shared_ptr<directed_edge> Edge_ptr;
 
 
-
+/* adjacent data in graph */
 typedef std::set<Vertex_ptr> Graph_vertices;
 typedef std::set<Edge_ptr> Set_edges;
 typedef std::map<Vertex_ptr, std::set<Edge_ptr>> Graph_edges;
-
 
 inline bool operator< (const Vertex_ptr lvp, const Vertex_ptr rvp) 
 {
@@ -123,9 +121,10 @@ inline bool operator< (const Edge_ptr lep, const Edge_ptr rep)
     return get<1>(lep->value()) < get<1>(rep->value());
 }
 
-
 class depth_first_search;
 
+
+/* basic directed graph */
 struct base_graph 
 {
     Graph_vertices vertices;
@@ -148,6 +147,30 @@ struct base_graph
         if (search == edges_from.end())
             return false;
         return search->second.find(e) != search->second.end();
+    }
+
+    Val vertex_value(Vertex_ptr x)
+    {
+        if (!vertex_in_graph(x))
+            return INVALID_VERTEX_VALUE;
+        return x->value();
+    }
+    Val edge_value(Edge_ptr e)
+    {
+        if (!edge_in_graph(e))
+            return INVALID_EDGE_VALUE;
+        return e->value();
+    }
+
+    void set_vertex_value(Vertex_ptr x, Val val)
+    {
+        if (vertex_in_graph(x))
+            x->set_value(val);
+    }
+    void set_edge_value(Edge_ptr e, Val val)
+    {
+        if (edge_in_graph(e))
+            e->set_value(val);
     }
 
     void vertices_insert(Vertex_ptr v) { vertices.insert(v); }
@@ -357,5 +380,60 @@ base_graph::base_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve)
             vertices_insert(v);
     }
 }
+
+
+/* * * * * * * * * * * * * * * * * * * * * 
+ *
+ *               CONCEPTS
+ *
+ * * * * * * * * * * * * * * * * * * * * */
+
+ /* DG: Directed Graph Concept */
+template<typename G>
+concept bool DG = requires(G) {
+    typename base_graph; // contains base_graph member
+}
+&& requires(G g, Vertex_ptr vp, Edge_ptr ep, Val v) {
+    { g.to_string() } -> std::string; //forces to_string() member
+    { g.set_value(vp, v) } //forces set_value() member for Vertex
+    { g.set_value(ep, v) } //forces set_value() member for Edge
+    { g.vertices_insert(vp) } //forces insert vertex member function
+    { g.vertices_erase(vp) } //forces erase vertex member function
+    { g.edges_from_insert(vp, ep) } //forces insert edge member function
+    { g.edges_from_erase(vp, ep) } //forces erase edge member function
+};
+
+ /* DAG: Directed Acyclic Graph Concept */
+template<typename G>
+concept bool DAG = requires(G) {
+    typename base_graph;
+}
+&& requires(G g, Vertex_ptr vp, Edge_ptr ep, Val v) {
+    { g.topological_order() } //SPECIAL: topological order member function
+    { g.to_string() } -> std::string;
+    { g.set_value(vp, v) }
+    { g.set_value(ep, v) }
+    { g.vertices_insert(vp) }
+    { g.vertices_erase(vp) }
+    { g.edges_from_insert(vp, ep) }
+    { g.edges_from_erase(vp, ep) }
+};
+
+ /* DT: Directed Tree Concept */
+template<typename G>
+concept bool DT = requires(G) {
+    typename base_graph;
+}
+&& requires(G g, Vertex_ptr vp, Edge_ptr ep, Val v) {
+    { g.root() } -> Vertex_ptr; //SPECIAL: must has root
+    { g.topological_order() } //SPECIAL: topological order member function
+    { g.to_string() } -> std::string;
+    { g.set_value(vp, v) }
+    { g.set_value(ep, v) }
+    { g.vertices_insert(vp) }
+    { g.vertices_erase(vp) }
+    { g.edges_from_insert(vp, ep) }
+    { g.edges_from_erase(vp, ep) }
+};
 
 #endif

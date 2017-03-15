@@ -7,7 +7,6 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "concepts.h"
 #include "basic.h"
 #include "dfs.h"
 
@@ -18,8 +17,7 @@ struct directed_acyclic_graph
     base_graph bg;
 
     directed_acyclic_graph() {}
-    //TODO: check dag after this
-    directed_acyclic_graph(base_graph& base): bg(base) {}
+    directed_acyclic_graph(base_graph& base);
     directed_acyclic_graph(vector<Vertex_ptr>& vv);
     directed_acyclic_graph(vector<Edge_ptr>& ve);
     directed_acyclic_graph(vector<Vertex_ptr>& vv, vector<Edge_ptr>& ve);
@@ -33,6 +31,11 @@ struct directed_acyclic_graph
 
     bool has_vertex(Vertex_ptr v) { return bg.vertex_in_graph(v); }
     bool has_edge(Edge_ptr e) { return bg.edge_in_graph(e); }
+
+    Val value(Vertex_ptr v) { return bg.vertex_value(v); }
+    Val value(Edge_ptr e) { return bg.edge_value(e); }
+    void set_value(Vertex_ptr v, Val val) { bg.set_vertex_value(v, val); }
+    void set_value(Edge_ptr e, Val val) { bg.set_edge_value(e, val); }
 
     void vertices_insert(Vertex_ptr v) { bg.vertices_insert(v); }
     void vertices_erase(Vertex_ptr v) { bg.vertices_erase(v); }
@@ -59,7 +62,7 @@ struct directed_acyclic_graph
     }
 
     /* what makes it special */
-    Graph_vertices topological_order() { return Graph_vertices{}; } 
+    vector<Vertex_ptr> topological_order();
 
     string to_string() 
     {
@@ -96,6 +99,15 @@ directed_acyclic_graph::directed_acyclic_graph(vector<Vertex_ptr>& vv, vector<Ed
         _DEBUG("ERROR: DAG not constructed due to cyclic input.");
 }
 
+directed_acyclic_graph::directed_acyclic_graph(base_graph& base)
+{
+    depth_first_search DFS;
+    if (!DFS.is_cyclic(base))
+        copy_base(base, true);
+    else
+        _DEBUG("ERROR: DAG not constructed due to cyclic input.");
+}
+
 void directed_acyclic_graph::copy_base(base_graph& base, bool trusted)
 {
     bool cyclic = false;
@@ -109,5 +121,10 @@ void directed_acyclic_graph::copy_base(base_graph& base, bool trusted)
         _DEBUG("ERROR: DAG not updated due to cyclic input.");
 }
 
+vector<Vertex_ptr> directed_acyclic_graph::topological_order()
+{
+    depth_first_search DFS;
+    return DFS.dfs(bg);
+}
 
 #endif
